@@ -102,14 +102,14 @@ switch ($role): ?>
               </p>
             </a>
           </li>
-<!--           <li class="nav-item">
+          <li class="nav-item">
             <a href="settings.php" class="nav-link <?php if($current == 'settings') {echo 'active';} ?>">
               <i class="nav-icon fas fa-cogs"></i>
               <p>
                 Settings
               </p>
             </a>
-          </li> -->
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

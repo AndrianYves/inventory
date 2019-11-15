@@ -1,5 +1,52 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
+<?php
+if(isset($_POST['submit'])){ 
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+  $timestamp = date("Y-m-d H:i:s");
+  $itemname = mysqli_real_escape_string($conn, strtolower($_POST["itemname"]));
+  $description = mysqli_real_escape_string($conn, strtolower($_POST["description"]));
+  $category = mysqli_real_escape_string($conn, $_POST["category"]);
+  $unit = mysqli_real_escape_string($conn, $_POST["unit"]);
+  $quantity = 0;
+
+  if ($category == 'New'){
+    $newCat = mysqli_real_escape_string($conn, strtolower($_POST["newCat"]));
+    $result = mysqli_query($conn, "INSERT INTO category(categoryname) VALUES('$newCat')");
+
+    $result2 = mysqli_query($conn, "SELECT * FROM category where `categoryname` = '$newCat'");
+    $row = mysqli_fetch_assoc($result2);
+    $catID = $row['id'];
+  } else {
+    $catID = $category;
+  }
+
+  if ($unit == 'New'){
+    $newUnit = mysqli_real_escape_string($conn, strtolower($_POST["newUnit"]));
+    $result = mysqli_query($conn, "INSERT INTO uom(uomname) VALUES('$newUnit')");
+
+    $result2 = mysqli_query($conn, "SELECT * FROM uom where `uomname` = '$newUnit'");
+    $row = mysqli_fetch_assoc($result2);
+    $unitID = $row['id'];
+  } else {
+    $unitID = $unit;
+  }
+
+  $sql = mysqli_query($conn, "INSERT INTO inventory(itemname, description, quantity, categoryID, unitID, timestamp, adminID) VALUES('$itemname', '$description', '$quantity', '$catID', '$unitID', '$timestamp', '$adminID')");   
+  
+  $_SESSION['success'] = 'Item Added';
+}
+?>
+<?php
+if (isset($_POST['submitQuantity'])) {
+  $inventory = $_POST['inventory'];
+  $quantity = $_POST['quantity'];
+
+  $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
+
+  $_SESSION['success'] = 'Quantity Updated';
+}
+?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php
@@ -73,15 +120,32 @@ include 'inc/navbar.php'; ?>
                   <thead>
                   <tr>
                     <th width="50">ID</th>
-                    <th width="200">Item Name</th>
+                    <th width="120">Item Name</th>
+                    <th width="200">Description</th>
                     <th width="100">Category</th>
                     <th width="50">Quantity</th>
-                    <th width="50">Unit of Measurement</th>
+                    <th width="30">Unit of Measurement</th>
+                    <th width="50">Action</th>
                   </tr>
                   </thead>
                   <tbody>
+                  <?php
+                  $result3 = mysqli_query($conn, "SELECT * FROM inventory join category on inventory.categoryID = category.id join uom on inventory.unitID = uom.id");
+                  while ($row = mysqli_fetch_array($result3)) {
+                        ?>
+                  <tr>
+                    <td><?php echo $row['id'];?></td>
+                    <td><?php echo ucwords($row['itemname']);?></td>
+                    <td><?php echo ucfirst($row['description']);?></td>
+                    <td><?php echo ucwords($row['categoryname']);?></td>
+                    <td><?php echo $row['quantity'];?></td>
+                    <td><?php echo strtolower($row['uomname']);?></td>
+                    <td><a href="editinventory.php?id=<?php echo $row['id'];?>" class="btn btn-info btn-sm m-0">VIEW</a></td>
+                  </tr>
+          
+                  <?php   } ?>
 
-                  </tfoot>
+                  </tbody>
                 </table>
               </div>
               <!-- /.card-body -->
@@ -100,15 +164,15 @@ include 'inc/navbar.php'; ?>
                 <table class="table table-bordered table-striped display">
                   <thead>
                   <tr>
-                    <th width="50">Item Name</th>
-                    <th width="200">Quantity</th>
-                    <th width="100">Unit of Measurement</th>
-                    <th width="50">Remarks</th>
+                    <th width="150">Item Name</th>
+                    <th width="30">Quantity</th>
+                    <th width="30">Unit of Measurement</th>
+                    <th width="100">Remarks</th>
                   </tr>
                   </thead>
                   <tbody>
 
-                  </tfoot>
+                  </tbody>
                 </table>
               </div>
               <!-- /.card-body -->
@@ -129,46 +193,60 @@ include 'inc/navbar.php'; ?>
               </button>
             </div>
             <div class="modal-body">
-              <form class="form-horizontal">
+              <form class="form-horizontal" action="inventory.php" method="POST">
+                <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                 <div class="card-body">
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Email</label>
+                    <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
                     <div class="col-sm-9">
-                      <input type="text" class="form-control" id="inputEmail3" placeholder="Email">
+                      <input type="text" class="form-control" placeholder="Name" name="itemname" required>
+                    </div>
+                  </div>
+                  <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-3 col-form-label">Description</label>
+                    <div class="col-sm-9">
+                      <textarea class="form-control" rows="3" placeholder="Enter Description..." name="description" required></textarea>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Category</label>
-                    <div class="col-sm-9">
-                      <select class="form-control">
-                        <option>option 1</option>
-                        <option>option 2</option>
-                        <option>option 3</option>
-                        <option>option 4</option>
-                        <option>option 5</option>
+                    <div class="col-sm-5">
+                      <select id="one" class="form-control" name="category">
+                        <option value="New">New Category</option>
+                        <?php $cat = mysqli_query($conn, "SELECT * from category");?>
+                        <?php foreach($cat as $category): ?>
+                          <option value="<?= $category['id']; ?>"><?= ucfirst($category['categoryname']); ?></option>
+                        <?php endforeach; ?>
                       </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <input type="text" class="form-control" id="inputCategory" name="newCat" placeholder="Category">
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Unit of Measurement</label>
-                    <div class="col-sm-9">
-                      <select class="form-control">
-                        <option>option 1</option>
-                        <option>option 2</option>
-                        <option>option 3</option>
-                        <option>option 4</option>
-                        <option>option 5</option>
+                    <div class="col-sm-5">
+                      <select id="two" class="form-control" name="unit">
+                        <option value="New">New Unit</option>
+                        <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
+                        <?php foreach($uom as $unit): ?>
+                          <option value="<?= $unit['id']; ?>"><?= strtoupper($unit['uomname']); ?></option>
+                        <?php endforeach; ?>
                       </select>
+                    </div>
+                    <div class="col-sm-4">
+                      <input type="text" class="form-control" id="inputUnit" name="newUnit" placeholder="Unit">
                     </div>
                   </div>
                 </div>
                 <!-- /.card-body -->
-              </form>
+              
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
+              <button type="submit" class="btn btn-primary" name="submit">Add Item</button>
             </div>
+            </form>
           </div>
           <!-- /.modal-content -->
         </div>
@@ -186,34 +264,33 @@ include 'inc/navbar.php'; ?>
               </button>
             </div>
             <div class="modal-body">
-               <form class="form-horizontal">
+               <form class="form-horizontal" action="inventory.php" method="POST">
                 <div class="card-body">
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
                     <div class="col-sm-9">
-                      <select class="form-control">
-                        <option>option 1</option>
-                        <option>option 2</option>
-                        <option>option 3</option>
-                        <option>option 4</option>
-                        <option>option 5</option>
+                      <select class="form-control" name="inventory">
+                        <?php $inventory = mysqli_query($conn, "SELECT * from inventory");?>
+                        <?php foreach($inventory as $inv): ?>
+                          <option value="<?= $inv['itemname']; ?>"><?= ucfirst($inv['itemname']); ?></option>
+                        <?php endforeach; ?>
                       </select>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" id="inputEmail3" placeholder="Quantity">
+                      <input type="number" class="form-control" placeholder="Quantity" name="quantity">
                     </div>
                   </div>
                 </div>
                 <!-- /.card-body -->
-              </form>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
+              <button type="submit" class="btn btn-primary" name="submitQuantity">Add Quantity</button>
             </div>
+            </form>
           </div>
           <!-- /.modal-content -->
         </div>
@@ -243,7 +320,26 @@ $(document).ready(function() {
 </script>
 <script src="plugins/datatables/jquery.dataTables.js"></script>
 <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#one').change(function() {
+    if( $(this).val() == 'New') {
+      $('#inputCategory').prop( "disabled", false );
+    } else {       
+      $('#inputCategory').prop( "disabled", true );
+    }
+  });
 
+  $('#two').change(function() {
+    if( $(this).val() == 'New') {
+      $('#inputUnit').prop( "disabled", false );
+    } else {       
+      $('#inputUnit').prop( "disabled", true );
+    }
+  });
+
+});
+</script>
 
 </body>
 </html>

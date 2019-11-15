@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 15, 2019 at 04:39 PM
+-- Generation Time: Nov 15, 2019 at 09:10 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -21,32 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `forkndagger`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `adduom`
---
-
-DROP TABLE IF EXISTS `adduom`;
-CREATE TABLE IF NOT EXISTS `adduom` (
-  `uom_add` varchar(20) NOT NULL,
-  `uom_id` int(11) NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`uom_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `adduom`
---
-
-INSERT INTO `adduom` (`uom_add`, `uom_id`) VALUES
-('dsds', 1),
-('eqwe', 2),
-('dasdsa', 3),
-('asdsadsa', 4),
-('dsadsa', 5),
-('hehe', 6),
-('audy', 7);
 
 -- --------------------------------------------------------
 
@@ -79,42 +53,24 @@ INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastn
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cancel`
---
-
-DROP TABLE IF EXISTS `cancel`;
-CREATE TABLE IF NOT EXISTS `cancel` (
-  `cancel_order` varchar(50) NOT NULL,
-  `status` varchar(50) NOT NULL,
-  `cancel_id` int(10) NOT NULL AUTO_INCREMENT,
-  `cancel_remarks` varchar(150) NOT NULL,
-  PRIMARY KEY (`cancel_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `category`
 --
 
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE IF NOT EXISTS `category` (
-  `category` varchar(20) NOT NULL,
-  `category_id` int(11) NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `categoryname` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `deduction`
+-- Dumping data for table `category`
 --
 
-DROP TABLE IF EXISTS `deduction`;
-CREATE TABLE IF NOT EXISTS `deduction` (
-  `menu_name` varchar(150) NOT NULL,
-  `quantity` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+INSERT INTO `category` (`id`, `categoryname`) VALUES
+(1, 'meat'),
+(2, 'fruits'),
+(3, 'liquid');
 
 -- --------------------------------------------------------
 
@@ -124,37 +80,26 @@ CREATE TABLE IF NOT EXISTS `deduction` (
 
 DROP TABLE IF EXISTS `inventory`;
 CREATE TABLE IF NOT EXISTS `inventory` (
-  `id` int(100) NOT NULL AUTO_INCREMENT,
-  `itemname` varchar(45) NOT NULL,
-  `category` char(45) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `unitofmeasurement` char(45) NOT NULL,
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `itemname` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `quantity` int(255) NOT NULL,
+  `categoryID` int(255) NOT NULL,
+  `unitID` int(255) NOT NULL,
+  `timestamp` timestamp(6) NOT NULL,
+  `adminID` int(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `inventory`
 --
 
-INSERT INTO `inventory` (`id`, `itemname`, `category`, `quantity`, `unitofmeasurement`) VALUES
-(1, 'asd', 'dry goods', 0, 'ds'),
-(2, 'dsadasd', 'dry goods', 0, 'Piraso'),
-(3, 'Ketchup', 'groceries', 0, 'mg'),
-(4, 'patrick', 'dry goods', 0, 'mg'),
-(5, 'keke', 'wet goods', 0, 'audy');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ledger`
---
-
-DROP TABLE IF EXISTS `ledger`;
-CREATE TABLE IF NOT EXISTS `ledger` (
-  `item_name` varchar(50) NOT NULL,
-  `uom` int(50) NOT NULL,
-  `balance` int(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+INSERT INTO `inventory` (`id`, `itemname`, `description`, `quantity`, `categoryID`, `unitID`, `timestamp`, `adminID`) VALUES
+(1, 'chicken', 'full grown', 28, 1, 1, '2019-11-15 10:39:16.000000', 1),
+(2, 'apple', 'green and came from japan.', 4, 2, 1, '2019-11-15 10:42:58.000000', 1),
+(3, 'beef', 'fresh from pampanga.', 5, 1, 1, '2019-11-15 10:54:45.000000', 1),
+(4, 'water', 'free water', 0, 3, 2, '2019-11-15 11:42:38.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -164,83 +109,66 @@ CREATE TABLE IF NOT EXISTS `ledger` (
 
 DROP TABLE IF EXISTS `menu`;
 CREATE TABLE IF NOT EXISTS `menu` (
-  `desciption` varchar(150) NOT NULL,
-  `menu_id` int(10) NOT NULL AUTO_INCREMENT,
-  `menu_name` varchar(45) NOT NULL,
-  `quantity` int(15) NOT NULL,
-  PRIMARY KEY (`menu_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `timestamp` timestamp(6) NOT NULL,
+  `adminID` int(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `menu`
+--
+
+INSERT INTO `menu` (`id`, `name`, `description`, `timestamp`, `adminID`) VALUES
+(1, 'adobe apple', 'adobo with apple', '2019-11-15 12:39:03.000000', 1),
+(2, 'water beef', 'water beef for men', '2019-11-15 12:47:52.000000', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reconcilation`
+-- Table structure for table `menuitems`
 --
 
-DROP TABLE IF EXISTS `reconcilation`;
-CREATE TABLE IF NOT EXISTS `reconcilation` (
-  `item_name` varchar(150) NOT NULL,
-  `inventory_quantity` int(50) NOT NULL,
-  `current_quantity` int(50) NOT NULL,
-  `remarks` varchar(150) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+DROP TABLE IF EXISTS `menuitems`;
+CREATE TABLE IF NOT EXISTS `menuitems` (
+  `menuID` int(255) NOT NULL,
+  `inventoryID` int(255) NOT NULL,
+  `quantity` int(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `menuitems`
+--
+
+INSERT INTO `menuitems` (`menuID`, `inventoryID`, `quantity`) VALUES
+(1, 1, 2),
+(1, 2, 5),
+(2, 3, 3),
+(2, 4, 5);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `relational`
+-- Table structure for table `uom`
 --
 
-DROP TABLE IF EXISTS `relational`;
-CREATE TABLE IF NOT EXISTS `relational` (
-  `relational_id` int(11) NOT NULL AUTO_INCREMENT,
-  `id` int(11) NOT NULL,
-  `uom_id` int(11) NOT NULL,
-  PRIMARY KEY (`relational_id`),
-  KEY `id` (`id`),
-  KEY `uom_id` (`uom_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
+DROP TABLE IF EXISTS `uom`;
+CREATE TABLE IF NOT EXISTS `uom` (
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `uomname` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`uomname`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `returns`
+-- Dumping data for table `uom`
 --
 
-DROP TABLE IF EXISTS `returns`;
-CREATE TABLE IF NOT EXISTS `returns` (
-  `return_id` int(10) NOT NULL AUTO_INCREMENT,
-  `order_table` int(40) NOT NULL,
-  `return_order` varchar(50) NOT NULL,
-  `quantity_order` int(40) NOT NULL,
-  `remarks` varchar(150) NOT NULL,
-  PRIMARY KEY (`return_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `spoilage`
---
-
-DROP TABLE IF EXISTS `spoilage`;
-CREATE TABLE IF NOT EXISTS `spoilage` (
-  `spoilage_id` int(10) NOT NULL AUTO_INCREMENT,
-  `spoilage_date` varchar(150) NOT NULL,
-  `category` varchar(150) NOT NULL,
-  PRIMARY KEY (`spoilage_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `relational`
---
-ALTER TABLE `relational`
-  ADD CONSTRAINT `relational_ibfk_1` FOREIGN KEY (`id`) REFERENCES `inventory` (`id`),
-  ADD CONSTRAINT `relational_ibfk_2` FOREIGN KEY (`uom_id`) REFERENCES `adduom` (`uom_id`);
+INSERT INTO `uom` (`id`, `uomname`) VALUES
+(1, 'kg'),
+(2, 'l');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
