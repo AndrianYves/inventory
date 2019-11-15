@@ -95,14 +95,6 @@ switch ($role): ?>
             </a>
           </li>
           <li class="nav-item">
-            <a href="reconciliation.php" class="nav-link <?php if($current == 'reconciliation') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-chart-bar"></i>
-              <p>
-                Reconciliation
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
             <a href="users.php" class="nav-link <?php if($current == 'users') {echo 'active';} ?>">
               <i class="nav-icon fas fa-users"></i>
               <p>
@@ -139,7 +131,7 @@ switch ($role): ?>
             <a href="order.php" class="nav-link <?php if($current == 'order') {echo 'active';} ?>">
               <i class="nav-icon fas fa-receipt"></i>
               <p>
-                Order
+                Orders
               </p>
             </a>
           </li>

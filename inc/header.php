@@ -6,7 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-  <title>Fork N' Dagger</title>
+  <title>
+    <?php 
+    if(isset($title) && !empty($title)) { 
+       echo $title; 
+    } 
+    else { 
+       echo "Fork N' Dagger"; 
+    } ?>
+  </title>
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
