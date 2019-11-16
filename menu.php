@@ -117,49 +117,50 @@ include 'inc/navbar.php'; ?>
                       <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'>View</button>
                     </td>
                   </tr>
-          
+                  <div class="modal fade" id="edit<?php echo $row['id']; ?>">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Recipes</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <form role="form" action="menu.php" method="POST">               
+                           <div class="card-body">
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Menu Name</label>
+                                <input type="text" class="form-control" name="menuName" value="<?php echo $row['name']; ?>">
+                              </div>
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Description</label>
+                                <input class="form-control" rows="3" value="<?php echo $row['description']; ?>">
+                              </div>
+                              <label for="inputEmail3" class="col-sm-4 col-form-label">Recipe</label>
+                              <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
+                              <?php foreach($cat as $category): ?>
+                              <div class="form-group row">
+                                <div class="col-sm-4">
+                                  <input type="text" class="form-control" value="<?= ucfirst($category['itemname']); ?>">
+                                </div>
+                                <div class="col-sm-4">
+                                  <input type="text" class="form-control" value="<?= ucfirst($category['quantity']); ?> <?= ucfirst($category['uomname']); ?>">
+                                </div>
+                              </div>
+                                <?php endforeach; ?>
 
-                   <div class="modal fade" id="edit<?php echo $row['id']; ?>">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Recipes</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form role="form" action="menu.php" method="POST">               
-               <div class="card-body">
-                  <div class="form-group">
-                    <label for="exampleInputEmail1">Menu Name</label>
-                    <input type="text" class="form-control" name="menuName" value="<?php echo $row['name']; ?>">
+                            </div>
+                            <!-- /.card-body -->
+                          
+                        </div>
+                        </form>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
                   </div>
-                  <div class="form-group">
-                    <label for="exampleInputEmail1">Description</label>
-                    <input class="form-control" rows="3" value="<?php echo $row['description']; ?>">
-                  </div>
-                  <div class="form-group">
-                    <label for="inputEmail3">Recipe</label>
-
-                    <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID where menuID = '".$row['id']."'");?>
-                          <?php foreach($cat as $category): ?>
-                            <h5><?= ucfirst($category['itemname']); ?></h5>
-                            <h5><?= ucfirst($category['quantity']); ?></h5>
-                    <?php endforeach; ?>
-                 
-                  </div>
-                </div>
-                <!-- /.card-body -->
-              
-            </div>
-            </form>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
+                  <!-- /.modal -->
                         <?php   } ?>
                   </tbody>
                 </table>
@@ -205,16 +206,16 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <tr>
+                    <?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
                     <td>
-                      <?php $cat = mysqli_query($conn, "SELECT * FROM inventory");?>
                       <select class="form-control" name="itemname[]" id="itemname_1">
                         <?php foreach($cat as $category): ?>
-                          <option value="<?= $category['id']; ?>"><?= ucfirst($category['itemname']); ?></option>
+                          <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>
                         <?php endforeach; ?>
                       </select>
                     </td>
                     <td>
-                      <input type="number" class="form-control" name="quantity[]" id="quantity_1">
+                      <input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_1">
                     </td>
                     <td>
                     <button type="button" name="add" id="add" class="btn btn-success btn-xs">Add Recipe</button>
@@ -281,7 +282,7 @@ $(document).ready(function(){
   var i=1;
   $('#add').click(function(){
     i++;
-    $('#dynamic_field').append('<tr id="row'+i+'"><td><select class="form-control" name="itemname[]" id="itemname_'+i+'"><?php foreach($cat as $category): ?><option value="<?= $category['id']; ?>"><?= ucfirst($category['itemname']); ?></option><?php endforeach; ?></select></td><td><input type="number" class="form-control" name="quantity[]" id="quantity_'+i+'"></td><td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td></tr>');
+    $('#dynamic_field').append('<tr id="row'+i+'"><td><select class="form-control" name="itemname[]" id="itemname_'+i+'"><?php foreach($cat as $category): ?><option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option><?php endforeach; ?></select></td><td><input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_'+i+'"></td><td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td></tr>');
   });
   
 

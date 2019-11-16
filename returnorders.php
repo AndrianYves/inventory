@@ -8,7 +8,6 @@ include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <?php if ($role == 'Admin'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -39,9 +38,6 @@ include 'inc/navbar.php'; ?>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <?php else: ?>
-    <?php include 'forbidden.php'; ?>
-  <?php endif ?>
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

@@ -49,7 +49,7 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index.php" class="brand-link">
+    <a href="index3.html" class="brand-link">
       <img src="image/logo.png" alt="Fork N' Dagger Logo" class="brand-image img-circle elevation-3"
            style="opacity: .8">
       <span class="brand-text font-weight-light">Fork N' Dagger</span>
@@ -91,6 +91,46 @@ switch ($role): ?>
               <i class="nav-icon fas fa-scroll"></i>
               <p>
                 Menu
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="order.php" class="nav-link <?php if($current == 'order') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-receipt"></i>
+              <p>
+                Orders
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="spoilage.php" class="nav-link <?php if($current == 'spoilage') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-fill-drip"></i>
+              <p>
+                Spoilage
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="returnorders.php" class="nav-link <?php if($current == 'return') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-undo"></i>
+              <p>
+                Return Orders
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="cancelorders.php" class="nav-link <?php if($current == 'cancel') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-times"></i>
+              <p>
+                Cancel Orders
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="reconciliation.php" class="nav-link <?php if($current == 'reconciliation') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-chart-bar"></i>
+              <p>
+                Reconciliation
               </p>
             </a>
           </li>
@@ -164,6 +204,14 @@ switch ($role): ?>
               <i class="nav-icon fas fa-chart-bar"></i>
               <p>
                 Reconciliation
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="settings.php" class="nav-link <?php if($current == 'settings') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-cogs"></i>
+              <p>
+                Settings
               </p>
             </a>
           </li>

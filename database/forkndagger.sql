@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 16, 2019 at 06:41 PM
+-- Generation Time: Nov 16, 2019 at 10:31 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -37,18 +37,20 @@ CREATE TABLE IF NOT EXISTS `admins` (
   `firstname` text NOT NULL,
   `lastname` text NOT NULL,
   `role` enum('Super User','Admin') NOT NULL,
+  `lastlogin` timestamp(6) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `admins`
 --
 
-INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastname`, `role`) VALUES
-(1, 'superadmin', '$2y$10$k8N/zvkpiASI/5Cjfyh4qO690dzm6yFA7ukJ62YgbHpQNimyMD6Zq', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User'),
-(2, 'admin', '$2y$10$9pXipDwls1/S7d69Sq7TMu82yCBAh8B5HKCqBXGw3oEl.P2s0qPVC', 'admin@gmail.com', 'adminFirst', 'adminLast', 'Admin');
+INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastname`, `role`, `lastlogin`) VALUES
+(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2019-11-16 13:39:11.000000'),
+(2, 'admin', '$2y$10$9pXipDwls1/S7d69Sq7TMu82yCBAh8B5HKCqBXGw3oEl.P2s0qPVC', 'admin@gmail.com', 'adminFirst', 'adminLast', 'Admin', '2019-11-16 13:11:38.000000'),
+(5, 'superuser1', '$2y$10$9vTcDONC8FOhqeq8Jo0cRuUYPOXB33jMTYYyDqCirpdGaK.iX9Z1y', '12345@gmail.com', 'andrian yves', 'macalino', 'Super User', NULL);
 
 -- --------------------------------------------------------
 
@@ -59,8 +61,9 @@ INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastn
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE IF NOT EXISTS `category` (
   `id` bigint(255) NOT NULL AUTO_INCREMENT,
-  `categoryname` text NOT NULL,
-  PRIMARY KEY (`id`)
+  `categoryname` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `categoryname` (`categoryname`)
 ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
@@ -70,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `category` (
 INSERT INTO `category` (`id`, `categoryname`) VALUES
 (1, 'meat'),
 (2, 'fruits'),
-(3, 'liquid');
+(3, 'condiments');
 
 -- --------------------------------------------------------
 
@@ -84,22 +87,21 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `itemname` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
   `quantity` int(255) NOT NULL,
-  `categoryID` int(255) NOT NULL,
-  `unitID` int(255) NOT NULL,
+  `categoryID` int(255) DEFAULT NULL,
+  `unitID` int(255) DEFAULT NULL,
   `timestamp` timestamp(6) NOT NULL,
   `adminID` int(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `inventory`
 --
 
 INSERT INTO `inventory` (`id`, `itemname`, `description`, `quantity`, `categoryID`, `unitID`, `timestamp`, `adminID`) VALUES
-(1, 'chicken', 'full grown', 28, 1, 1, '2019-11-15 10:39:16.000000', 1),
-(2, 'apple', 'green and came from japan.', 4, 2, 1, '2019-11-15 10:42:58.000000', 1),
-(3, 'beef', 'fresh from pampanga.', 5, 1, 1, '2019-11-15 10:54:45.000000', 1),
-(4, 'water', 'free water', 0, 3, 2, '2019-11-15 11:42:38.000000', 1);
+(1, 'apple', 'green from japan', 0, 2, 1, '2019-11-16 12:37:08.000000', 1),
+(2, 'chicken', 'full grown', 0, 1, 1, '2019-11-16 12:39:47.000000', 1),
+(3, 'vinegar', 'vinegar 1l', 0, 3, 4, '2019-11-16 12:51:31.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -122,8 +124,8 @@ CREATE TABLE IF NOT EXISTS `menu` (
 --
 
 INSERT INTO `menu` (`id`, `name`, `description`, `timestamp`, `adminID`) VALUES
-(1, 'adobe apple', 'adobo with apple', '2019-11-15 12:39:03.000000', 1),
-(2, 'water beef', 'water beef for men', '2019-11-15 12:47:52.000000', 1);
+(1, 'adobe apple', 'adobe with apples', '2019-11-16 13:07:41.000000', 1),
+(2, 'adobe water', 'adobe with just water', '2019-11-16 13:56:25.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -135,7 +137,7 @@ DROP TABLE IF EXISTS `menuitems`;
 CREATE TABLE IF NOT EXISTS `menuitems` (
   `menuID` int(255) NOT NULL,
   `inventoryID` int(255) NOT NULL,
-  `quantity` int(255) NOT NULL
+  `quantity` decimal(65,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -143,10 +145,11 @@ CREATE TABLE IF NOT EXISTS `menuitems` (
 --
 
 INSERT INTO `menuitems` (`menuID`, `inventoryID`, `quantity`) VALUES
-(1, 1, 2),
-(1, 2, 5),
-(2, 3, 3),
-(2, 4, 5);
+(1, 1, '3.00'),
+(1, 2, '1.00'),
+(1, 3, '0.25'),
+(2, 2, '1.00'),
+(2, 3, '0.50');
 
 -- --------------------------------------------------------
 
@@ -160,16 +163,9 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `qtyMenu` bigint(255) DEFAULT NULL,
   `menu_id` bigint(255) DEFAULT NULL,
   `timestamp` timestamp(6) NULL DEFAULT NULL,
-  `addItemId` bigint(255) DEFAULT NULL,
+  `addItemId` int(255) DEFAULT NULL,
   PRIMARY KEY (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `addItemId`) VALUES
-(1, 22, 1, '2019-11-16 08:25:55.000000', NULL);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -183,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `uom` (
   `uomname` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`uomname`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `uom`
@@ -191,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `uom` (
 
 INSERT INTO `uom` (`id`, `uomname`) VALUES
 (1, 'kg'),
-(2, 'l');
+(4, 'l');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

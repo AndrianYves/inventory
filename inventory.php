@@ -47,6 +47,42 @@ if (isset($_POST['submitQuantity'])) {
   $_SESSION['success'] = 'Quantity Updated';
 }
 ?>
+<?php
+if (isset($_POST['submit1'])) {
+  $edititemname = $_POST['edititemname'];
+  $editdescription = $_POST['editdescription'];
+  $itemid = $_POST['itemid'];
+  $editcategory = mysqli_real_escape_string($conn, $_POST["editcategory"]);
+  $editunit = mysqli_real_escape_string($conn, $_POST["editunit"]);
+
+  if ($editcategory == 'New'){
+    $editnewCat = mysqli_real_escape_string($conn, strtolower($_POST["editnewCat"]));
+    $result = mysqli_query($conn, "INSERT INTO category(categoryname) VALUES('$editnewCat')");
+
+    $result2 = mysqli_query($conn, "SELECT * FROM category where `categoryname` = '$editnewCat'");
+    $row = mysqli_fetch_assoc($result2);
+    $catID = $row['id'];
+  } else {
+    $catID = $editcategory;
+  }
+
+  if ($editunit == 'New'){
+    $editnewUnit = mysqli_real_escape_string($conn, strtolower($_POST["editnewUnit"]));
+    $result = mysqli_query($conn, "INSERT INTO uom(uomname) VALUES('$editnewUnit')");
+
+    $result2 = mysqli_query($conn, "SELECT * FROM uom where `uomname` = '$editnewUnit'");
+    $row = mysqli_fetch_assoc($result2);
+    $unitID = $row['id'];
+  } else {
+    $unitID = $editunit;
+  }
+
+  $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', categoryID='$catID', unitID='$unitID' WHERE id='$itemid'");
+
+  $_SESSION['success'] = 'Inventory Updated';
+}
+?>
+
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php
@@ -130,19 +166,89 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $result3 = mysqli_query($conn, "SELECT * FROM inventory join category on inventory.categoryID = category.id join uom on inventory.unitID = uom.id");
+                  $result3 = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory left join category on inventory.categoryID = category.id left join uom on inventory.unitID = uom.id");
                   while ($row = mysqli_fetch_array($result3)) {
                         ?>
                   <tr>
-                    <td><?php echo $row['id'];?></td>
+                    <td><?php echo $row['invID'];?></td>
                     <td><?php echo ucwords($row['itemname']);?></td>
                     <td><?php echo ucfirst($row['description']);?></td>
                     <td><?php echo ucwords($row['categoryname']);?></td>
                     <td><?php echo $row['quantity'];?></td>
                     <td><?php echo strtolower($row['uomname']);?></td>
-                    <td><a href="editinventory.php?id=<?php echo $row['id'];?>" class="btn btn-info btn-sm m-0">VIEW</a></td>
+                    <td><a data-toggle="modal" data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info btn-sm m-0">Edit</a></td>
                   </tr>
-          
+                  <div class="modal fade" id="view<?php echo $row['invID']; ?>">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Edit Inventory</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <form class="form-horizontal" action="inventory.php" method="POST">
+                            <div class="card-body">
+                              <div class="form-group row">
+                                <input class="form-check-input" type="hidden" name="itemid" id="itemid" value="<?php echo $row['invID'];?>" style="visibility: hidden;">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Item Name</label>
+                                <div class="col-sm-8">
+                                  <input type="text" class="form-control" value="<?php echo $row['itemname']; ?>" name="edititemname">
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Description</label>
+                                <div class="col-sm-8">
+                                  <textarea class="form-control" rows="3" name="editdescription"><?php echo $row['description']; ?></textarea>
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Category</label>
+                                <div class="col-sm-4">
+                                  <select id="one<?php echo $row['invID']; ?>" class="form-control" name="editcategory">
+                                    <option value="New">Create Category</option>
+                                    <?php $cat = mysqli_query($conn, "SELECT * from category");?>
+                                    <?php foreach($cat as $category): ?>
+                                      <option value="<?= $category['id']; ?>"><?= ucfirst($category['categoryname']); ?></option>
+                                    <?php endforeach; ?>
+                                  </select>
+                                </div>
+                                <div class="col-sm-4">
+                                  <input type="text" class="form-control" id="editcat<?php echo $row['invID']; ?>" name="editnewCat" value="<?php echo $row['categoryname']; ?>">
+                                </div>
+                              </div>
+                              <div class="form-group row">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Unit of Measurement</label>
+                                <div class="col-sm-4">
+                                  <select id="two<?php echo $row['invID']; ?>" class="form-control" name="editunit">
+                                    <option value="New">Create Unit</option>
+                                    <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
+                                    <?php foreach($uom as $unit): ?>
+                                      <option value="<?= $unit['id']; ?>"><?= strtoupper($unit['uomname']); ?></option>
+                                    <?php endforeach; ?>
+                                  </select>
+                                </div>
+                                <div class="col-sm-4">
+                                  <input type="text" class="form-control" id="edituom<?php echo $row['invID']; ?>" name="editnewUnit" value="<?php echo $row['uomname']; ?>">
+                                </div>
+                              </div>
+                            </div>
+                            <!-- /.card-body -->
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submit1">Update Inventory</button>
+                        </div>
+                        </form>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+        
                   <?php   } ?>
 
                   </tbody>
@@ -211,8 +317,8 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Category</label>
                     <div class="col-sm-5">
-                      <select id="one" class="form-control" name="category">
-                        <option value="New">New Category</option>
+                      <select id="three" class="form-control" name="category">
+                        <option value="New">Create Category</option>
                         <?php $cat = mysqli_query($conn, "SELECT * from category");?>
                         <?php foreach($cat as $category): ?>
                           <option value="<?= $category['id']; ?>"><?= ucfirst($category['categoryname']); ?></option>
@@ -226,8 +332,8 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Unit of Measurement</label>
                     <div class="col-sm-5">
-                      <select id="two" class="form-control" name="unit">
-                        <option value="New">New Unit</option>
+                      <select id="four" class="form-control" name="unit">
+                        <option value="New">Create Unit</option>
                         <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
                         <?php foreach($uom as $unit): ?>
                           <option value="<?= $unit['id']; ?>"><?= strtoupper($unit['uomname']); ?></option>
@@ -322,7 +428,7 @@ $(document).ready(function() {
 <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  $('#one').change(function() {
+  $('#three').change(function() {
     if( $(this).val() == 'New') {
       $('#inputCategory').prop( "disabled", false );
     } else {       
@@ -330,7 +436,7 @@ $(document).ready(function() {
     }
   });
 
-  $('#two').change(function() {
+  $('#four').change(function() {
     if( $(this).val() == 'New') {
       $('#inputUnit').prop( "disabled", false );
     } else {       
@@ -340,6 +446,30 @@ $(document).ready(function() {
 
 });
 </script>
+<?php
+$result4 = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory left join category on inventory.categoryID = category.id left join uom on inventory.unitID = uom.id");
+while ($row = mysqli_fetch_array($result4)) {
+      ?>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#one<?php echo $row['invID']; ?>').change(function() {
+    if( $(this).val() == 'New') {
+      $('#editcat<?php echo $row['invID']; ?>').prop( "disabled", false );
+    } else {       
+      $('#editcat<?php echo $row['invID']; ?>').prop( "disabled", true );
+    }
+  });
 
+  $('#two<?php echo $row['invID']; ?>').change(function() {
+    if( $(this).val() == 'New') {
+      $('#edituom<?php echo $row['invID']; ?>').prop( "disabled", false );
+    } else {       
+      $('#edituom<?php echo $row['invID']; ?>').prop( "disabled", true );
+    }
+  });
+
+});
+</script>
+<?php } ?>
 </body>
 </html>
