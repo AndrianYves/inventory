@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 15, 2019 at 09:10 PM
+-- Generation Time: Nov 16, 2019 at 06:41 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -147,6 +147,29 @@ INSERT INTO `menuitems` (`menuID`, `inventoryID`, `quantity`) VALUES
 (1, 2, 5),
 (2, 3, 3),
 (2, 4, 5);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `orders`
+--
+
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE IF NOT EXISTS `orders` (
+  `order_id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `qtyMenu` bigint(255) DEFAULT NULL,
+  `menu_id` bigint(255) DEFAULT NULL,
+  `timestamp` timestamp(6) NULL DEFAULT NULL,
+  `addItemId` bigint(255) DEFAULT NULL,
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `addItemId`) VALUES
+(1, 22, 1, '2019-11-16 08:25:55.000000', NULL);
 
 -- --------------------------------------------------------
 
