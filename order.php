@@ -3,27 +3,44 @@
 <?php
 
 if (isset($_POST['submit'])) {
-  $number = count($_POST["itemname"]);
+  $result1 = mysqli_query($conn, "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
+  $query = mysqli_fetch_assoc($result1);
+  $orderNumber = $query['order_id'] + 1;
+
   $getMenuName = $_POST['menuName'];
+  $status = 'Pending';
   $getQuantityMenu = mysqli_real_escape_string($conn, $_POST["qtyMenu"]);
 
   $getTimestamp = date("Y-m-d H:i:s");
 
-  $sql = mysqli_query($conn,"INSERT INTO `orders`(`qtyMenu`, `menu_id`, `timestamp`) VALUES ('$getQuantityMenu', '$getMenuName', '$getTimestamp')");
+  $sql = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`) VALUES ('$orderNumber', '$getQuantityMenu', '$getMenuName', '$getTimestamp', '$status')");
+  // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
 
-  $queryMaxId = mysqli_query($conn, "SELECT MAX(*) FROM `orders`");
-  $getMaxId = mysqli_fetch_assoc($queryMaxId);
-
+  $number = count($_POST["inventoryID"]);
   for ($i=0; $i < $number; $i++) { 
-    if (trim($_POST['itemname'][$i] != '')) {
-      $queryItemId = mysqli_query($conn, "SELECT * FROM inventory WHERE `itemname` = '".mysqli_real_escape_string($conn, $_POST["itemname"][$i])."'");
-      $getItemId = mysqli_fetch_assoc($queryItemId);
+    if(trim($_POST["inventoryID"][$i] != '')) {
+      $newQuantity = mysqli_real_escape_string($conn, ($_POST["orderQuantity"][$i] * $getQuantityMenu));
 
-      $insertAddItems = mysqli_query($conn, "INSERT INTO orders(addItemId, addOrderQty) VALUES ('".$getItemId['id']."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."')");
+    $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, inventoryID, quantity) VALUES('$orderNumber', '".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '$newQuantity')");   
+
+    $sql2 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity - '$newQuantity' WHERE id='".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."'");
     }
+
   }
+
 }
 
+?>
+<?php
+if (isset($_POST['updateOrder'])) {
+  $delivered = $_POST['delivered'];
+  $orderID = $_POST['updateOrderID'];
+  $lastUpdatedStatus = date("Y-m-d H:i:s");
+
+  $result1 = mysqli_query($conn,"UPDATE orders SET status='$delivered', lastUpdatedStatus='$lastUpdatedStatus' WHERE order_id='$orderID'");
+
+  $_SESSION['success'] = 'Order  Updated';
+}
 ?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
@@ -54,7 +71,28 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container">
-
+      <?php
+        if(isset($_SESSION['error'])){
+          echo "
+            <div class='alert alert-danger alert-dismissible'>
+            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
+              ".$_SESSION['error']." 
+            </div>
+          ";
+          unset($_SESSION['error']);
+        }
+        if(isset($_SESSION['success'])){
+          echo "
+            <div class='alert alert-success alert-dismissible'>
+                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+                  <h5><i class='icon fas fa-check'></i> Success!</h5>
+              ".$_SESSION['success']." 
+            </div>
+          ";
+          unset($_SESSION['success']);
+        }
+      ?>
         <div class="row">
           <div class="col-12">
             <div class="card">
@@ -73,6 +111,7 @@ include 'inc/navbar.php'; ?>
                     <th width="160">Order Name</th>
                     <th width="120">Quantity Menu</th>
                     <th width="120">Timestamp</th>
+                    <th width="50">Status</th>
                     <th width="50">Action</th>
                   </tr>
                   </thead>
@@ -80,16 +119,74 @@ include 'inc/navbar.php'; ?>
                   <?php
                   $getAllOrders = mysqli_query($conn, "SELECT * FROM `orders` JOIN `menu` ON id=menu_id");
                   while($row = mysqli_fetch_assoc($getAllOrders)) {
+                     if ($row['status'] == 'Pending'){
+                        $color = 'primary';
+                        $orderstatus = 'none';
+                      } elseif ($row['status'] == 'Canceled'){
+                        $color = 'danger';
+                        $orderstatus = 'hidden';
+                      } elseif ($row['status'] == 'Returned'){
+                        $color = 'warning';
+                        $orderstatus = 'hidden';
+                      } else {
+                        $color = 'success';
+                        $orderstatus = 'hidden';
+                      }
                   ?>
                     <tr>
-                      <td><?php echo $row['name'] ?></td>
-                      <td><?php echo $row['qtyMenu'] ?></td>
+                      <td><?php echo ucwords($row['name']); ?></td>
+                      <td><?php echo $row['qtyMenu']; ?></td>
                       <td><?php echo date('F-j-Y/ g:i A',strtotime($row['timestamp']));  ?></td>
+                      <td class="text-center"><span class="badge bg-<?php echo $color; ?>"><?php echo $row['status']; ?></span></td>
                       <td>
-                        <button type="button" class="btn btn-info btn-sm m-0 sendOrderId" data-toggle="modal" data-target="#viewOrder" id="<?php echo $row['order_id'] ?>">View Order</button>
+                        <button type="button" class="btn btn-info btn-sm m-0" data-toggle="modal" data-target="#viewOrder<?php echo $row['order_id'] ?>">View Order</button>
                       </td>
                     </tr>
-                    
+
+                    <div class="modal fade" id="viewOrder<?php echo $row['order_id'] ?>">
+                      <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title">Orders</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+
+                            <form action="order.php" method="POST">
+                              <input class="form-check-input" type="hidden" name="updateOrderID" id="updateOrderID" value="<?php echo $row['order_id'];?>" style="visibility: hidden;">
+                              <div class="card-body">
+                                  <dt>Recipe</dt>
+                                  <?php 
+                                    $getAllmenu = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id join menu on menuitems.menuID = menu.id where menu.id = '".$row['menu_id']."'");
+                                    while($row1 = mysqli_fetch_assoc($getAllmenu)) {
+     
+                                  ?><dl>
+                                    <dd><?php echo ucwords($row1['itemname']); ?> <?php echo $row1['menuQuan']; ?> <?php echo $row1['uomname']; ?></dd>
+                                  </dl>
+                                     <?php
+                                        }
+                                        ?>
+                                  <div class="form-check" style="visibility: <?php echo $orderstatus;?>">
+                                  <input class="form-check-input" type="checkbox" value="Delivered" name="delivered">
+                                  <label class="form-check-label">Delivered</label>
+                                </div>
+                              </div>
+                              <!-- /.card-body -->
+                            
+                          </div>
+                          <div class="modal-footer justify-content-between" style="visibility: <?php echo $orderstatus;?>">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn btn-primary" name="updateOrder" value = "Update Order">
+                          </div>
+                          </form>
+                        </div>
+                        <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
                   <?php
                   }
                   ?>
@@ -114,15 +211,15 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-body">
 
-              <form action="" method="POST">
+              <form action="order.php" method="POST">
                 <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                 <div class="card-body">
-                  <?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>
+                  <?php $cat = mysqli_query($conn, "SELECT name, id as menuID FROM menu order by name");?>
                   <div class="form-group">
                     <label for="exampleInputEmail1">Menu Name</label>
                     <select class="form-control" name="menuName" id="menuName" size="5">
                       <?php foreach($cat as $acategory): ?>
-                      <option value="<?= $acategory['name']; ?>"><?= ucfirst($acategory['name']); ?></option>
+                      <option value="<?= $acategory['menuID']; ?>"><?= ucfirst($acategory['name']); ?></option>
                       <?php endforeach; ?>
                     </select>
                   </div>
@@ -136,39 +233,6 @@ include 'inc/navbar.php'; ?>
                     <label for="exampleInputEmail1">Quantity Menu</label>
                     <input type="number" class="form-control" rows="3" name="qtyMenu" id="qtyMenu" required>
                   </div>
-                  <div class="form-group">
-                    <label for="inputEmail3">Others</label>
-                  
-                  
-                 <table id="dynamic_field" class="table table-bordered table-striped">
-                  <thead>
-                  <tr>
-                    <th width="120">Item Name</th>
-                    <th width="50">Quantity</th>
-                    <th width="30">Add</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                    <?php $uom = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
-                    <td>
-                      <select class="form-control" name="itemname[]" id="itemname_1">
-                        <?php foreach($uom as $category): ?>
-                          <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>
-                        <?php endforeach; ?>
-                      </select>
-                    </td>
-                    <td>
-                      <input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_1">
-                    </td>
-                    <td>
-                    <button type="button" name="add" id="add" class="btn btn-success btn-xs">Add Recipe</button>
-                    </td>
-                  </tr>
-
-                  </tbody>
-                </table>
-                </div>
                 </div>
                 <!-- /.card-body -->
               
@@ -212,44 +276,6 @@ $(document).ready(function() {
       "ordering": true,
       "info": true,
       "autoWidth": false,
-    });
-  });
-</script>
-
-<script>
-$(document).ready(function(){
-  var i=1;
-  $('#add').click(function(){
-    i++;
-    $('#dynamic_field').append('<tr id="row'+i+'">'+
-      '<?php $uom = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>'+
-      '<td>'+
-        '<select class="form-control" name="itemname[]" id="itemname_'+i+'">'+
-          '<?php foreach($uom as $category): ?>'+
-          '<option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>'+
-          '<?php endforeach; ?>'+
-        '</select>'+
-      '</td>'+
-      '<td>'+
-        '<input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_'+i+'">'+
-      '</td>'+
-      '<td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td>'+
-    '</tr>');
-  });
-  
-
-  $(document).on('click', '.btn_remove', function(){
-    var button_id = $(this).attr("id"); 
-    $('#row'+button_id+'').remove();
-  });
-  
-});
-
-</script>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('#sendOrderId').click(function() {
-      $.post('order.php', {variable: this.id});
     });
   });
 </script>

@@ -44,7 +44,11 @@ if (isset($_POST['submitQuantity'])) {
 
   $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
 
-  $_SESSION['success'] = 'Quantity Updated';
+  if ($quantity < 0){
+    $_SESSION['success'] = ''.ucfirst($inventory).' Quantity Subtracted';
+  } else {
+    $_SESSION['success'] = ''.ucfirst($inventory).' Quantity Added';
+  }
 }
 ?>
 <?php
@@ -146,7 +150,7 @@ include 'inc/navbar.php'; ?>
                   <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Add New Item</button>
                   </div>
                   <div class="col-3">
-                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#quantity">Add Quantity</button>
+                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#quantity">Add or Subtract Quantity</button>
                   </div>
                 </div>
               </div>
@@ -373,6 +377,7 @@ include 'inc/navbar.php'; ?>
                <form class="form-horizontal" action="inventory.php" method="POST">
                 <div class="card-body">
                   <div class="form-group row">
+                    <h5 class="text-danger">Note: Input negative number to subtract quantity.</h5>
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
                     <div class="col-sm-9">
                       <select class="form-control" name="inventory">
