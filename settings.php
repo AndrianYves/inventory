@@ -295,7 +295,7 @@ include 'inc/navbar.php'; ?>
 
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Update Password</h3>
+                <h3 class="card-title">Change Password</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body" style="height: 300px;">
@@ -340,7 +340,7 @@ include 'inc/navbar.php'; ?>
 
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Update Password</h3>
+                <h3 class="card-title">Change Password</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body" style="height: 300px;">
@@ -394,13 +394,5 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-<script type="text/javascript">
-$(document).ready(function() {
-  $('table.display').DataTable();
-} );
-</script>
-<script src="plugins/datatables/jquery.dataTables.js"></script>
-<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
-
 </body>
 </html>
