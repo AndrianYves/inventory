@@ -2,7 +2,7 @@
 <?php
 if (isset($_POST['search'])) {
   $Name = $_POST['search'];
-  $Query = "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id join menu on menuitems.menuID = menu.id where menu.name like '%$Name%'";
+  $Query = "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id join menu on menuitems.menuID = menu.id where menu.name = '$Name'";
   $ExecQuery = MySQLi_query($conn, $Query);
   echo '<ul>';
   while ($Result = MySQLi_fetch_array($ExecQuery)) { ?>

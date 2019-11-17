@@ -108,8 +108,7 @@ include 'inc/navbar.php'; ?>
                   <?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>
                   <div class="form-group">
                     <label for="exampleInputEmail1">Menu Name</label>
-                    <select class="form-control" name="menuName" id="menuName">
-                      <option value="none">Select Menu</option>
+                    <select class="form-control" name="menuName" id="menuName" size="5">
                       <?php foreach($cat as $acategory): ?>
                       <option value="<?= $acategory['name']; ?>"><?= ucfirst($acategory['name']); ?></option>
                       <?php endforeach; ?>
@@ -183,6 +182,7 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
+
 <script type="text/javascript">
 $(document).ready(function() {
   $('table.display').DataTable();
@@ -250,5 +250,13 @@ $(document).ready(function() {
    });
 });
 </script>
+<script type="text/javascript">
+  $(document).ready(function(){
+ 
+  // Initialize select2
+  $("#menuName").select2();
+});
+</script>
+<script src="plugins/select2/js/select2.full.min.js"></script>
 </body>
 </html>
