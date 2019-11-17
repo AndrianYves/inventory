@@ -3,6 +3,7 @@
 <?php
 
 if (isset($_POST['submit'])) {
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $result1 = mysqli_query($conn, "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
   $query = mysqli_fetch_assoc($result1);
   $orderNumber = $query['order_id'] + 1;
@@ -13,7 +14,7 @@ if (isset($_POST['submit'])) {
 
   $getTimestamp = date("Y-m-d H:i:s");
 
-  $sql = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`) VALUES ('$orderNumber', '$getQuantityMenu', '$getMenuName', '$getTimestamp', '$status')");
+  $sql = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`, `adminID`) VALUES ('$orderNumber', '$getQuantityMenu', '$getMenuName', '$getTimestamp', '$status', '$adminID')");
   // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
 
   $number = count($_POST["inventoryID"]);
@@ -159,7 +160,7 @@ include 'inc/navbar.php'; ?>
                               <div class="card-body">
                                   <dt>Recipe</dt>
                                   <?php 
-                                    $getAllmenu = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id join menu on menuitems.menuID = menu.id where menu.id = '".$row['menu_id']."'");
+                                    $getAllmenu = mysqli_query($conn, "SELECT *, ordersitems.quantity as menuQuan from orders join ordersitems on orders.order_id = ordersitems.orderID join inventory on ordersitems.inventoryID = inventory.id join uom on inventory.unitID = uom.id where orders.order_id = '".$row['order_id']."'");
                                     while($row1 = mysqli_fetch_assoc($getAllmenu)) {
      
                                   ?><dl>
@@ -258,27 +259,6 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-
-<script type="text/javascript">
-$(document).ready(function() {
-  $('table.display').DataTable();
-} );
-</script>
-<script src="plugins/datatables/jquery.dataTables.js"></script>
-<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
-<script>
-  $(function () {
-    $("#example1").DataTable();
-    $('#example2').DataTable({
-      "paging": true,
-      "lengthChange": false,
-      "searching": false,
-      "ordering": true,
-      "info": true,
-      "autoWidth": false,
-    });
-  });
-</script>
 <script type="text/javascript">
 $(document).ready(function() {
    $("#menuName").change(function() {

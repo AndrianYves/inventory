@@ -209,7 +209,7 @@ include 'inc/navbar.php'; ?>
                               </div>
                               <div class="form-group row">
                                 <label for="inputEmail3" class="col-sm-4 col-form-label">Category</label>
-                                <div class="col-sm-4">
+                                <div class="col-sm-5">
                                   <select id="one<?php echo $row['invID']; ?>" class="form-control" name="editcategory">
                                     <option value="New">Create Category</option>
                                     <?php $cat = mysqli_query($conn, "SELECT * from category");?>
@@ -218,13 +218,13 @@ include 'inc/navbar.php'; ?>
                                     <?php endforeach; ?>
                                   </select>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-3">
                                   <input type="text" class="form-control" id="editcat<?php echo $row['invID']; ?>" name="editnewCat" value="<?php echo $row['categoryname']; ?>">
                                 </div>
                               </div>
                               <div class="form-group row">
                                 <label for="inputEmail3" class="col-sm-4 col-form-label">Unit of Measurement</label>
-                                <div class="col-sm-4">
+                                <div class="col-sm-5">
                                   <select id="two<?php echo $row['invID']; ?>" class="form-control" name="editunit">
                                     <option value="New">Create Unit</option>
                                     <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
@@ -233,7 +233,7 @@ include 'inc/navbar.php'; ?>
                                     <?php endforeach; ?>
                                   </select>
                                 </div>
-                                <div class="col-sm-4">
+                                <div class="col-sm-3">
                                   <input type="text" class="form-control" id="edituom<?php echo $row['invID']; ?>" name="editnewUnit" value="<?php echo $row['uomname']; ?>">
                                 </div>
                               </div>
@@ -424,13 +424,7 @@ include 'inc/navbar.php'; ?>
 
 <!-- page script -->
 <?php include 'inc/scripts.php'; ?>
-<script type="text/javascript">
-$(document).ready(function() {
-  $('table.display').DataTable();
-} );
-</script>
-<script src="plugins/datatables/jquery.dataTables.js"></script>
-<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function() {
   $('#three').change(function() {

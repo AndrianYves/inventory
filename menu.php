@@ -95,7 +95,7 @@ include 'inc/navbar.php'; ?>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table id="example1" class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped display">
                   <thead>
                   <tr>
                     <th width="120">Menu Name</th>
@@ -254,27 +254,6 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-<script type="text/javascript">
-$(document).ready(function() {
-  $('table.display').DataTable();
-} );
-</script>
-<script src="plugins/datatables/jquery.dataTables.js"></script>
-<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
-<script>
-  $(function () {
-    $("#example1").DataTable();
-    $('#example2').DataTable({
-      "paging": true,
-      "lengthChange": false,
-      "searching": false,
-      "ordering": true,
-      "info": true,
-      "autoWidth": false,
-    });
-  });
-</script>
-
 <script>
 $(document).ready(function(){
   var i=1;

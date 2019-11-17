@@ -17,7 +17,7 @@ if (isset($_POST['search'])) {
   while ($Result = MySQLi_fetch_array($ExecQuery)) { ?>
   <tr>
     <td><input type="hidden" class="form-control" name="inventoryID[]" value="<?php echo $Result['inventoryID']; ?>"><?php echo ucfirst($Result['itemname']); ?></td>
-    <td><input type="number" class="form-control" name="orderQuantity[]" value="<?php echo ucfirst($Result['menuQuan']); ?>"></td>
+    <td><input type="number" class="form-control" step=".01" name="orderQuantity[]" value="<?php echo ucfirst($Result['menuQuan']); ?>"></td>
     <td><?php echo strtolower($Result['uomname']); ?></td>    
   </tr>
 <?php
