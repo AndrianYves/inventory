@@ -89,6 +89,79 @@ include 'inc/navbar.php'; ?>
           </div><!-- /.col -->
         </div><!-- /.row -->
 
+        <div class="modal fade" id="viewOrder">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">View Order</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form action="" method="POST">
+                <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
+                <div class="card-body">
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Order Name</label>
+                    <?php
+                    $getVar = $variable-1;
+                    $queryId = mysqli_query($conn, "SELECT * FROM `orders` JOIN `menu` ON id=menu_id WHERE `order_id`='$getVar'");
+                    $row = mysqli_fetch_assoc($queryId);
+                    echo $row['name'];
+                    ?>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Quantity Menu</label>
+                    <?php
+                    echo $row['qtyMenu'];
+                    ?>
+                  </div>
+                  <div class="form-group">
+                    <label for="inputEmail3">Others</label>
+                  <table id="dynamic_field" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th width="120">Item Name</th>
+                    <th width="50">Quantity</th>
+                    <th width="30">UOM</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $queryOthers = mysqli_query($conn, "SELECT * FROM orders
+                      JOIN menu ON id=menu_id
+                      JOIN menuitems ON menuID=id
+                      JOIN inventory ON addItemID = inventory.id
+                      JOIN uom ON unitID = uom.id");
+                      while ($row = mysqli_fetch_array($queryOthers)) {
+                    ?>
+                    <tr>
+                      <td><?php echo $row['itemname']; ?></td>
+                      <td><?php echo $row['qtyMenu']; ?></td>
+                      <td><?php echo $row['uomname']; ?></td>
+                    </tr>
+                    <?php
+                    }
+                    ?>
+                  </tbody>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </form>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+
       </div><!-- /.container-fluid -->
 
       <div class="modal fade" id="item">

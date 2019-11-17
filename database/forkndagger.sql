@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 16, 2019 at 10:31 PM
+-- Generation Time: Nov 17, 2019 at 02:44 AM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -166,6 +166,21 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `addItemId` int(255) DEFAULT NULL,
   PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `returns`
+--
+
+DROP TABLE IF EXISTS `returns`;
+CREATE TABLE IF NOT EXISTS `returns` (
+  `return_id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `inventory_id` bigint(255) DEFAULT NULL,
+  `return_type` enum('spoilage','cancel','return') DEFAULT NULL,
+  `return_date` timestamp(6) NULL DEFAULT NULL,
+  PRIMARY KEY (`return_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
