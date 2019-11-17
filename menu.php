@@ -98,7 +98,6 @@ include 'inc/navbar.php'; ?>
                 <table id="example1" class="table table-bordered table-striped">
                   <thead>
                   <tr>
-                    <th width="50">ID</th>
                     <th width="120">Menu Name</th>
                     <th width="200">Description</th>
                     <th width="50">Action</th>
@@ -110,7 +109,6 @@ include 'inc/navbar.php'; ?>
                   while ($row = mysqli_fetch_array($result3)) {
                         ?>
                   <tr>
-                    <td><?php echo $row['id'];?></td>
                     <td><?php echo ucwords($row['name']);?></td>
                     <td><?php echo ucfirst($row['description']);?></td>
                     <td>

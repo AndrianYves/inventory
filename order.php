@@ -89,79 +89,6 @@ include 'inc/navbar.php'; ?>
           </div><!-- /.col -->
         </div><!-- /.row -->
 
-        <div class="modal fade" id="viewOrder">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">View Order</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="" method="POST">
-                <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
-                <div class="card-body">
-                  <div class="form-group">
-                    <label for="exampleInputEmail1">Order Name</label>
-                    <?php
-                    $getVar = $variable-1;
-                    $queryId = mysqli_query($conn, "SELECT * FROM `orders` JOIN `menu` ON id=menu_id WHERE `order_id`='$getVar'");
-                    $row = mysqli_fetch_assoc($queryId);
-                    echo $row['name'];
-                    ?>
-                  </div>
-                  <div class="form-group">
-                    <label for="exampleInputEmail1">Quantity Menu</label>
-                    <?php
-                    echo $row['qtyMenu'];
-                    ?>
-                  </div>
-                  <div class="form-group">
-                    <label for="inputEmail3">Others</label>
-                  <table id="dynamic_field" class="table table-bordered table-striped">
-                  <thead>
-                  <tr>
-                    <th width="120">Item Name</th>
-                    <th width="50">Quantity</th>
-                    <th width="30">UOM</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    $queryOthers = mysqli_query($conn, "SELECT * FROM orders
-                      JOIN menu ON id=menu_id
-                      JOIN menuitems ON menuID=id
-                      JOIN inventory ON addItemID = inventory.id
-                      JOIN uom ON unitID = uom.id");
-                      while ($row = mysqli_fetch_array($queryOthers)) {
-                    ?>
-                    <tr>
-                      <td><?php echo $row['itemname']; ?></td>
-                      <td><?php echo $row['qtyMenu']; ?></td>
-                      <td><?php echo $row['uomname']; ?></td>
-                    </tr>
-                    <?php
-                    }
-                    ?>
-                  </tbody>
-                  </tbody>
-                </table>
-                </div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <div class="modal-footer justify-content-between">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-            </form>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
-
       </div><!-- /.container-fluid -->
 
       <div class="modal fade" id="item">
@@ -181,30 +108,18 @@ include 'inc/navbar.php'; ?>
                   <?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>
                   <div class="form-group">
                     <label for="exampleInputEmail1">Menu Name</label>
-                    
                     <select class="form-control" name="menuName" id="menuName">
                       <option value="none">Select Menu</option>
-                      <?php foreach($cat as $category): ?>
-                      <option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>
+                      <?php foreach($cat as $acategory): ?>
+                      <option value="<?= $acategory['name']; ?>"><?= ucfirst($acategory['name']); ?></option>
                       <?php endforeach; ?>
                     </select>
                   </div>
                   <label>Recipe</label>
-                  <?php foreach($cat as $category): ?>
-                    <?php $menu = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$category['menuID']."'");?>
-                    <div id="menu<?= $category['menuID']; ?>">
-                    <?php foreach($menu as $menuitems): ?>
-                    <div class="form-group row">
-                      <div class="col-sm-4">
-                        <input type="text" class="form-control" value="<?= ucfirst($menuitems['itemname']); ?>">
-                      </div>
-                      <div class="col-sm-4">
-                        <input type="text" class="form-control" value="<?= ucfirst($menuitems['quantity']); ?> <?= ucfirst($menuitems['uomname']); ?>">
-                      </div>
-                    </div>
-                      <?php endforeach; ?>
-                    </div>
-                    <?php endforeach; ?>
+                  
+                   <!-- Suggestions will be displayed in below div. -->
+                   <div class="form-group" id="display"></div>
+
 
                   <div class="form-group">
                     <label for="exampleInputEmail1">Quantity Menu</label>
@@ -224,10 +139,10 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <tr>
-                    <?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
+                    <?php $uom = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
                     <td>
                       <select class="form-control" name="itemname[]" id="itemname_1">
-                        <?php foreach($cat as $category): ?>
+                        <?php foreach($uom as $category): ?>
                           <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>
                         <?php endforeach; ?>
                       </select>
@@ -313,20 +228,27 @@ $(document).ready(function(){
     });
   });
 </script>
-<?php foreach($cat as $category): ?>
 <script type="text/javascript">
 $(document).ready(function() {
- 
-  $('#menuName').change(function() {
-    if( $(this).val() == 'none') {
-      $("#menu<?= $category['id']; ?>").hide();
-    } else{
-      $("#menu<?= $category['id']; ?>").show();
-    }
-  });
- 
+   $("#menuName").change(function() {
+       var name = $(this).val();
+       if (name == "") {
+           $("#display").html("");
+       }
+       else {
+           $.ajax({
+               type: "POST",
+               url: "ajax.php",
+               data: {
+                   search: name
+               },
+               success: function(html) {
+                   $("#display").html(html).show();
+               }
+           });
+       }
+   });
 });
 </script>
-<?php endforeach; ?>
 </body>
 </html>
