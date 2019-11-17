@@ -3,13 +3,25 @@
 <?php
 
 if (isset($_POST['submit'])) {
+  $number = count($_POST["itemname"]);
   $getMenuName = $_POST['menuName'];
   $getQuantityMenu = mysqli_real_escape_string($conn, $_POST["qtyMenu"]);
 
-  echo $getMenuName;
   $getTimestamp = date("Y-m-d H:i:s");
 
   $sql = mysqli_query($conn,"INSERT INTO `orders`(`qtyMenu`, `menu_id`, `timestamp`) VALUES ('$getQuantityMenu', '$getMenuName', '$getTimestamp')");
+
+  $queryMaxId = mysqli_query($conn, "SELECT MAX(*) FROM `orders`");
+  $getMaxId = mysqli_fetch_assoc($queryMaxId);
+
+  for ($i=0; $i < $number; $i++) { 
+    if (trim($_POST['itemname'][$i] != '')) {
+      $queryItemId = mysqli_query($conn, "SELECT * FROM inventory WHERE `itemname` = '".mysqli_real_escape_string($conn, $_POST["itemname"][$i])."'");
+      $getItemId = mysqli_fetch_assoc($queryItemId);
+
+      $insertAddItems = mysqli_query($conn, "INSERT INTO orders(addItemId, addOrderQty) VALUES ('".$getItemId['id']."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."')");
+    }
+  }
 }
 
 ?>
@@ -209,7 +221,20 @@ $(document).ready(function(){
   var i=1;
   $('#add').click(function(){
     i++;
-    $('#dynamic_field').append('<tr id="row'+i+'"><td><select class="form-control" name="itemname[]" id="itemname_'+i+'"><?php foreach($cat as $category): ?><option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option><?php endforeach; ?></select></td><td><input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_'+i+'"></td><td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td></tr>');
+    $('#dynamic_field').append('<tr id="row'+i+'">'+
+      '<?php $uom = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>'+
+      '<td>'+
+        '<select class="form-control" name="itemname[]" id="itemname_'+i+'">'+
+          '<?php foreach($uom as $category): ?>'+
+          '<option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>'+
+          '<?php endforeach; ?>'+
+        '</select>'+
+      '</td>'+
+      '<td>'+
+        '<input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_'+i+'">'+
+      '</td>'+
+      '<td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td>'+
+    '</tr>');
   });
   
 
