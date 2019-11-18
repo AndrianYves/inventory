@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 18, 2019 at 07:09 AM
+-- Generation Time: Nov 18, 2019 at 03:59 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -200,23 +200,29 @@ DROP TABLE IF EXISTS `returns`;
 CREATE TABLE IF NOT EXISTS `returns` (
   `return_id` bigint(255) NOT NULL AUTO_INCREMENT,
   `inventory_id` bigint(255) DEFAULT NULL,
+  `menu_id` bigint(255) DEFAULT NULL,
   `return_type` enum('spoilage','cancel','return') DEFAULT NULL,
   `return_date` timestamp(6) NULL DEFAULT NULL,
+  `return_qty` bigint(255) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`return_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `returns`
 --
 
-INSERT INTO `returns` (`return_id`, `inventory_id`, `return_type`, `return_date`, `remarks`) VALUES
-(1, 1, 'spoilage', '2019-11-17 09:12:10.000000', 'spoiled'),
-(2, 2, 'cancel', '2019-11-17 09:12:10.000000', 'canceled'),
-(3, 3, 'return', '2019-11-17 09:12:10.000000', 'returned'),
-(4, 4, 'spoilage', '2019-11-17 09:12:10.000000', 'spolied'),
-(5, 5, 'cancel', '2019-11-17 09:12:10.000000', 'canceled'),
-(6, 1, 'return', '2019-11-17 09:12:10.000000', 'returned');
+INSERT INTO `returns` (`return_id`, `inventory_id`, `menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES
+(1, 1, NULL, 'spoilage', '2019-11-17 09:12:10.000000', 5, 'spoiled'),
+(2, NULL, 2, 'cancel', '2019-11-17 09:12:10.000000', 4, 'canceled'),
+(3, NULL, 3, 'return', '2019-11-17 09:12:10.000000', 1, 'returned'),
+(4, 4, NULL, 'spoilage', '2019-11-17 09:12:10.000000', 9, 'spolied'),
+(5, NULL, 5, 'cancel', '2019-11-17 09:12:10.000000', 3, 'canceled'),
+(6, NULL, 1, 'return', '2019-11-17 09:12:10.000000', 3, 'returned'),
+(7, NULL, 2, 'return', '2019-11-17 09:12:10.000000', 2, ''),
+(8, NULL, 1, 'return', '2019-11-18 04:52:59.000000', 12354, 'returned'),
+(9, NULL, 1, 'cancel', '2019-11-18 05:34:46.000000', 1234, 'Wews'),
+(10, 3, NULL, 'spoilage', '2019-11-18 06:36:07.000000', NULL, '12355');
 
 -- --------------------------------------------------------
 
