@@ -2,28 +2,11 @@
 <?php include 'inc/header.php'; ?>
 <?php
 if (isset($_POST['submit'])) {
-  $number = count($_POST['menuName']);
-  $getTimestamp = date("Y-m-d H:i:s");
-  if ($number > 0) {
-    $queryMaxId = mysqli_query($conn, "SELECT COUNT(*) as count FROM `returns`");
-    $execMaxId = mysqli_fetch_assoc($queryMaxId);
-    $getMaxId = $execMaxId['count'];
+  $getMenuName = $_POST['return_name'];
+  $getQuantity = $_POST['return_qty'];
+  $timestamp = date("Y-m-d H:i:s");
 
-    for ($i=0; $i < $number; $i++) { 
-      if (trim($_POST['menuName'][$i] != '')) {
-        $queryItemId = mysqli_query($conn, "SELECT * FROM orders
-        JOIN menu ON menu_id=menu.id
-        JOIN menuitems ON menuID = menu.id
-        JOIN inventory ON inventoryID = inventory.id
-        WHERE menu.name = '".mysqli_real_escape_string($conn, $_POST["menuName"][$i])."'");
-        while($execItemId = mysqli_fetch_assoc($queryItemId)) {
-          $getItemId = $execItemId['inventory.id'];
-
-          $insertReturnQuery = "INSERT INTO `returns`(`return_id`, `inventory_id`, `return_type`, `return_date`) VALUES ('$getMaxId','$getItemId','return','$getTimestamp')";
-        }
-      }
-    }
-  }
+  $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getMenuName','return','$timestamp', '$getQuantity','returned')");
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -72,22 +55,18 @@ include 'inc/navbar.php'; ?>
                   <tr>
                     <th width="120">Menu name</th>
                     <th width="150">Quantity</th>
-                    <th width="50">Action</th>
                   </tr>
                   </thead>
                   <tbody>
                   <?php
                   $getAllReturn = mysqli_query($conn, "SELECT * FROM forkndagger.returns
-                  JOIN inventory ON inventory_id = inventory.id
-                  WHERE return_type = 'return'");
+                  JOIN menu ON menu_id=menu.id
+                  where return_type = 'return'");
                   while($row = mysqli_fetch_assoc($getAllReturn)) {
                   ?>
-                    <tr>
-                      <td></td>
-                      <td></td>
-                      <td>
-                        <button type="button" class="btn btn-info btn-sm m-0 sendOrderId" data-toggle="modal" data-target="#viewSpoilage" id="<?php echo $row['return_id'] ?>">View return</button>
-                      </td>
+                    <tr align="center">
+                      <td><?php echo $row['name']; ?></td>
+                      <td><?php echo $row['return_qty']; ?></td>
                     </tr>
                     
                   <?php
@@ -118,14 +97,14 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-body">
 
-              <form action="" method="POST">
+              <form action="returnorders.php" method="POST">
                 <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                 <div class="card-body returnOrder">
                   <?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>
                   <div class="row">
                   <div class="form-group col-xs-6">
                     <label for="exampleInputEmail1">Menu Name</label>
-                    <select class="form-control" name="menuName[]" id="menuName_1">
+                    <select class="form-control" name="return_name" id="return_name">
                       <option value="none">Select Menu</option>
                       <?php foreach($cat as $category): ?>
                       <option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>
@@ -134,10 +113,9 @@ include 'inc/navbar.php'; ?>
                     </div>
                     <div class="form-group col-xs-6">
                     <label for="exampleInputEmail1">Quantity</label>
-                    <input type="number" class="form-control" rows="3" name="qty[]" id="qty_1" required>
+                    <input type="number" class="form-control" rows="3" name="return_qty" id="return_qty" required>
                   </div>          
-                  </div>
-                  <button type="button" name="add" id="add" class="btn btn-success btn-xs" style="height: 30%; width: 15%;">+</button> 
+                  </div> 
                 </div>
                 <!-- /.card-body -->
               
@@ -160,39 +138,5 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-<script type="text/javascript">
-  $(document).ready(function(){
-  var i=1;
-  $('#add').click(function(){
-    i++;
-    $('.returnOrder').append('<?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>'+
-      '<div class="row" id="row'+i+'">'+
-        '<div class="form-group col-sm">'+
-          '<label for="exampleInputEmail1">Menu Name</label>'+
-          '<select class="form-control" name="menuName[]" id="menuName_'+i+'">'+
-            '<option value="none">Select Menu</option>'+
-            '<?php foreach($cat as $category): ?>'+
-            '<option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>'+
-            '<?php endforeach; ?>'+
-            '</select>'+
-          '</div>'+
-          '<div class="form-group col-sm">'+
-            '<label for="exampleInputEmail1">Quantity</label>'+
-            '<input type="number" class="form-control" rows="3" name="qty[]" id="qty_'+i+'" required>'+
-          '</div>'+
-          '<div class="form-group col-sm">'+
-            '<button type="button" name="add" id="'+i+'" class="btn btn-danger btn_remove">-</button>'+
-          '</div>'+
-        '</div>');
-  });
-  
-
-  $(document).on('click', '.btn_remove', function(){
-    var button_id = $(this).attr("id"); 
-    $('#row'+button_id+'').remove();
-  });
-  
-});
-</script>
 </body>
 </html>

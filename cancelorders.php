@@ -2,7 +2,22 @@
 <?php include 'inc/header.php'; ?>
 <?php
 if (isset($_POST['submit'])) {
-  
+  $getMenuName = $_POST['menu_name'];
+  $getQuantity = $_POST['cancel_qty'];
+  $timestamp = date("Y-m-d H:i:s");
+  $getRemarks = $_POST['remarks'];
+
+  $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getMenuName','cancel','$timestamp', '$getQuantity','$getRemarks')");
+
+  $queryQuantity = mysqli_query($conn, "SELECT * FROM menuitems JOIN menu ON menuID = menu.id WHERE menuID = '$getMenuName'");
+
+  while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
+    $getInvId = $execQuantity['inventoryID'];
+    $getQty = $execQuantity['quantity'];
+
+    $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity`+'$getQty' WHERE `id`='$getInvId'");
+  }
+
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -57,14 +72,14 @@ include 'inc/navbar.php'; ?>
                   <tbody>
                   <?php
                   $getAllCancel = mysqli_query($conn, "SELECT * FROM forkndagger.returns
-                  JOIN inventory ON inventory_id = inventory.id
+                  JOIN menu ON menu_id=menu.id
                   WHERE return_type = 'cancel'");
                   while($row = mysqli_fetch_assoc($getAllCancel)) {
                   ?>
                     <tr>
-                      <td></td>
-                      <td></td>
-                      <td></td>
+                      <td><?php echo $row['name']; ?></td>
+                      <td><?php echo $row['return_qty']; ?></td>
+                      <td><?php echo $row['remarks']; ?></td>
                     </tr>
                     
                   <?php
@@ -101,7 +116,7 @@ include 'inc/navbar.php'; ?>
                   <div class="row">
                   <div class="form-group col-xs-6">
                     <label for="exampleInputEmail1">Menu Name</label>
-                    <select class="form-control" name="menuName[]" id="menuName_1">
+                    <select class="form-control" name="menu_name" id="menu_name">
                       <option value="none">Select Menu</option>
                       <?php foreach($cat as $category): ?>
                       <option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>
@@ -110,17 +125,15 @@ include 'inc/navbar.php'; ?>
                     </div>
                     <div class="form-group col-xs-6">
                     <label for="exampleInputEmail1">Quantity</label>
-                    <input type="number" class="form-control" rows="3" name="qty[]" id="qty_1" required>
+                    <input type="number" class="form-control" rows="3" name="cancel_qty" id="cancel_qty" required>
                   </div>          
                   </div>
-                  <button type="button" name="add" id="add" class="btn btn-success btn-xs" style="height: 30%; width: 15%;">+</button>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3">Remarks</label>
                     <input type="text" class="form-control" rows="2" name="remarks" id="remarks" required>
                 </div>
                 <!-- /.card-body -->
-              
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -140,39 +153,5 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-
-<script type="text/javascript">
-  $(document).ready(function(){
-  var i=1;
-  $('#add').click(function(){
-    i++;
-    $('.cancelOrder').append('<div class="card-body">'+
-      '<?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>'+
-      '<div class="row" id="row'+i+'">'+
-        '<div class="form-group col-xs-6">'+
-          '<label for="exampleInputEmail1">Menu Name</label>'+
-          '<select class="form-control" name="menuName[]" id="menuName_'+i+'">'+
-            '<option value="none">Select Menu</option>'+
-            '<?php foreach($cat as $category): ?>'+
-            '<option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>'+
-          '<?php endforeach; ?>'+
-        '</select>'+
-      '</div>'+
-      '<div class="form-group col-xs-6">'+
-      '<label for="exampleInputEmail1">Quantity</label>'+
-      '<input type="number" class="form-control" rows="3" name="qty[]" id="qty_'+i+'" required>'+
-    '</div>'+
-  '<button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove" style="height: 30%; width: 15%;">-</button>'+
-  '</div>'+
-    '</div>');
-  });
-  
-  $(document).on('click', '.btn_remove', function(){
-    var button_id = $(this).attr("id"); 
-    $('#row'+button_id+'').remove();
-  });
-  
-});
-</script>
 </body>
 </html>
