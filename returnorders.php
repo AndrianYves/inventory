@@ -1,5 +1,31 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
+<?php
+if (isset($_POST['submit'])) {
+  $number = count($_POST['menuName']);
+  $getTimestamp = date("Y-m-d H:i:s");
+  if ($number > 0) {
+    $queryMaxId = mysqli_query($conn, "SELECT COUNT(*) as count FROM `returns`");
+    $execMaxId = mysqli_fetch_assoc($queryMaxId);
+    $getMaxId = $execMaxId['count'];
+
+    for ($i=0; $i < $number; $i++) { 
+      if (trim($_POST['menuName'][$i] != '')) {
+        $queryItemId = mysqli_query($conn, "SELECT * FROM orders
+        JOIN menu ON menu_id=menu.id
+        JOIN menuitems ON menuID = menu.id
+        JOIN inventory ON inventoryID = inventory.id
+        WHERE menu.name = '".mysqli_real_escape_string($conn, $_POST["menuName"][$i])."'");
+        while($execItemId = mysqli_fetch_assoc($queryItemId)) {
+          $getItemId = $execItemId['inventory.id'];
+
+          $insertReturnQuery = "INSERT INTO `returns`(`return_id`, `inventory_id`, `return_type`, `return_date`) VALUES ('$getMaxId','$getItemId','return','$getTimestamp')";
+        }
+      }
+    }
+  }
+}
+?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php

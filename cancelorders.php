@@ -1,5 +1,10 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
+<?php
+if (isset($_POST['submit'])) {
+  
+}
+?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php
@@ -143,10 +148,10 @@ include 'inc/navbar.php'; ?>
     i++;
     $('.cancelOrder').append('<div class="card-body">'+
       '<?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>'+
-      '<div class="row">'+
+      '<div class="row" id="row'+i+'">'+
         '<div class="form-group col-xs-6">'+
           '<label for="exampleInputEmail1">Menu Name</label>'+
-          '<select class="form-control" name="menuName[]" id="menuName_1">'+
+          '<select class="form-control" name="menuName[]" id="menuName_'+i+'">'+
             '<option value="none">Select Menu</option>'+
             '<?php foreach($cat as $category): ?>'+
             '<option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>'+
@@ -155,15 +160,13 @@ include 'inc/navbar.php'; ?>
       '</div>'+
       '<div class="form-group col-xs-6">'+
       '<label for="exampleInputEmail1">Quantity</label>'+
-      '<input type="number" class="form-control" rows="3" name="qty[]" id="qty_1" required>'+
+      '<input type="number" class="form-control" rows="3" name="qty[]" id="qty_'+i+'" required>'+
     '</div>'+
-  '<button type="button" name="add" id="add" class="btn btn-danger" style="height: 30%; width: 15%;">-</button>'+
-            
+  '<button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove" style="height: 30%; width: 15%;">-</button>'+
   '</div>'+
     '</div>');
   });
   
-
   $(document).on('click', '.btn_remove', function(){
     var button_id = $(this).attr("id"); 
     $('#row'+button_id+'').remove();
