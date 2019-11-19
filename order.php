@@ -3,30 +3,48 @@
 <?php
 
 if (isset($_POST['submit'])) {
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $result1 = mysqli_query($conn, "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
   $query = mysqli_fetch_assoc($result1);
   $orderNumber = $query['order_id'] + 1;
+  $error = false;
 
   $getMenuName = $_POST['menuName'];
   $status = 'Pending';
   $getQuantityMenu = mysqli_real_escape_string($conn, $_POST["qtyMenu"]);
 
   $getTimestamp = date("Y-m-d H:i:s");
-
-  $sql = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`) VALUES ('$orderNumber', '$getQuantityMenu', '$getMenuName', '$getTimestamp', '$status')");
   // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
+
+
+  mysqli_autocommit($conn, false);
 
   $number = count($_POST["inventoryID"]);
   for ($i=0; $i < $number; $i++) { 
     if(trim($_POST["inventoryID"][$i] != '')) {
       $newQuantity = mysqli_real_escape_string($conn, ($_POST["orderQuantity"][$i] * $getQuantityMenu));
+      $getItemQty = (-1 * $newQuantity);
 
-    $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, inventoryID, quantity) VALUES('$orderNumber', '".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '$newQuantity')");   
+      $sql2 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity - '$newQuantity' WHERE id='".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."'");
 
-    $sql2 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity - '$newQuantity' WHERE id='".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."'");
+      $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, inventoryID, quantity) VALUES('$orderNumber', '".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '$newQuantity')");   
+
+      $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, adminID) VALUES('".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '$getItemQty', 'Order', '$orderNumber', '$getTimestamp', '$adminID')");
+       if (!$sql2) {
+        $error = true;
+        }
     }
-
   }
+
+    $sql3 = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`, `adminID`) VALUES ('$orderNumber', '$getQuantityMenu', '$getMenuName', '$getTimestamp', '$status', '$adminID')");
+      
+      if (!$error) {
+        mysqli_commit($conn);
+        $_SESSION['success'] = 'Order '.$orderNumber.' Created';
+      } else {
+        mysqli_rollback($conn);
+       $_SESSION['error'] = 'Not enough Recipe.';
+      }
 
 }
 

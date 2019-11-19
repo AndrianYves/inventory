@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	include 'inc/conn.php';;
+	date_default_timezone_set("Asia/Bangkok");
 
 	if(isset($_SESSION['admin'])){
 		$query = $conn -> prepare("SELECT * FROM admins WHERE id = ? ");

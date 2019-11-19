@@ -8,12 +8,20 @@ if (isset($_POST['submit'])) {
   $getItemQty = (-1 * $_POST['spoilage_qty']);
   $getRemarks = $_POST['remarks'];
   $timestamp = date("Y-m-d H:i:s");
+  $error = false;
 
-  $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`inventory_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getItem','spoilage','$timestamp','$getItemQty','$getRemarks')");
+  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'") or ($_SESSION['error'] = 'Quantity is below zero.' and $error = true);
 
-  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'");
+  if(!$error){
+    $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`inventory_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getItem','spoilage','$timestamp','$getItemQty','$getRemarks')");
 
-  $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, timestamp, adminID) VALUES('$getItem', '$getItemQty', 'Spoilage', '$timestamp', '$adminID')"); 
+    $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getItem', '$getItemQty', 'Spoilage', '$getRemarks', '$timestamp', '$adminID')"); 
+
+    $_SESSION['success'] = 'Spoilage added';
+
+  }
+
+  
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -45,6 +53,29 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
+              <?php
+        if(isset($_SESSION['error'])){
+          echo "
+            <div class='alert alert-danger alert-dismissible'>
+            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
+              ".$_SESSION['error']." 
+            </div>
+          ";
+          unset($_SESSION['error']);
+        }
+        if(isset($_SESSION['success'])){
+          echo "
+            <div class='alert alert-success alert-dismissible'>
+                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
+                  <h5><i class='icon fas fa-check'></i> Success!</h5>
+              ".$_SESSION['success']." 
+            </div>
+          ";
+          unset($_SESSION['success']);
+        }
+      ?>
+
         <div class="row">
           <div class="col-12">
             <div class="card">
@@ -74,9 +105,9 @@ include 'inc/navbar.php'; ?>
                   ?>
                     <tr>
                       <td><?php echo date('F-j-Y/ g:i A',strtotime($row['return_date']));  ?></td>
-                      <td><?php echo $row['itemname']; ?></td>
+                      <td><?php echo ucwords($row['itemname']); ?></td>
                       <td><?php echo (-1 * $row['return_qty']); ?></td>
-                      <td><?php echo $row['remarks']; ?></td>
+                      <td><?php echo ucfirst($row['remarks']); ?></td>
                     </tr>
                     
                   <?php

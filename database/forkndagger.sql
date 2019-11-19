@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 19, 2019 at 03:12 PM
+-- Generation Time: Nov 19, 2019 at 07:31 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
 --
 
 INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastname`, `role`, `lastlogin`) VALUES
-(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2019-11-19 04:51:03.000000'),
+(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2019-11-19 09:17:22.000000'),
 (2, 'admin', '$2y$10$9pXipDwls1/S7d69Sq7TMu82yCBAh8B5HKCqBXGw3oEl.P2s0qPVC', 'admin@gmail.com', 'adminFirst', 'adminLast', 'Admin', '2019-11-16 13:11:38.000000'),
 (5, 'superuser1', '$2y$10$9vTcDONC8FOhqeq8Jo0cRuUYPOXB33jMTYYyDqCirpdGaK.iX9Z1y', '12345@gmail.com', 'andrian yves', 'macalino', 'Super User', NULL);
 
@@ -101,12 +101,12 @@ CREATE TABLE IF NOT EXISTS `inventory` (
 --
 
 INSERT INTO `inventory` (`id`, `itemname`, `description`, `quantity`, `lowquantity`, `categoryID`, `unitID`, `timestamp`, `adminID`) VALUES
-(1, 'green apple', 'green from japan', '2.49', '3.00', 2, 1, '2019-11-16 12:37:08.000000', 1),
+(1, 'green apple', 'green from japan', '1.49', '12.00', 2, 1, '2019-11-16 12:37:08.000000', 1),
 (2, 'chicken', 'full grown', '0.00', '3.00', 1, 1, '2019-11-16 12:39:47.000000', 1),
-(3, 'vinegar', 'vinegar 1l', '1.25', '5.00', 3, 4, '2019-11-16 12:51:31.000000', 1),
-(4, 'purified water', 'purified water for drinks recipe.', '11.00', '5.00', 4, 5, '2019-11-17 02:49:00.000000', 1),
-(5, 'watermelon', 'fresh from pampanga.', '10.00', '5.00', 2, 1, '2019-11-17 02:49:17.000000', 1),
-(6, 'lemon', 'dole lemons.', '10.00', '5.00', 2, 1, '2019-11-17 02:49:41.000000', 1);
+(3, 'vinegar', 'vinegar 1l', '0.00', '5.00', 3, 4, '2019-11-16 12:51:31.000000', 1),
+(4, 'purified water', 'purified water for drinks recipe.', '50.00', '5.00', 4, 5, '2019-11-17 02:49:00.000000', 1),
+(5, 'watermelon', 'fresh from pampanga.', '258.00', '10.00', 2, 1, '2019-11-17 02:49:17.000000', 1),
+(6, 'lemon', 'dole lemons.', '10.50', '5.00', 2, 1, '2019-11-17 02:49:41.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -120,31 +120,25 @@ CREATE TABLE IF NOT EXISTS `ledger` (
   `inventoryID` int(255) NOT NULL,
   `quantity` decimal(65,2) NOT NULL,
   `transaction` enum('Inventory','Order','Cancel','Return','Spoilage') NOT NULL,
+  `transactionID` bigint(255) DEFAULT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
   `timestamp` timestamp(6) NOT NULL,
   `adminID` int(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `ledger`
 --
 
-INSERT INTO `ledger` (`id`, `inventoryID`, `quantity`, `transaction`, `timestamp`, `adminID`) VALUES
-(1, 1, '3.00', 'Inventory', '2019-11-19 06:45:38.000000', 1),
-(2, 1, '-10.00', 'Inventory', '2019-11-19 06:50:26.000000', 1),
-(3, 1, '3.00', 'Spoilage', '2019-11-19 06:55:41.000000', 1),
-(4, 1, '-3.00', 'Spoilage', '2019-11-19 06:59:58.000000', 1),
-(5, 1, '23.00', 'Inventory', '2019-11-19 14:02:05.000000', 1),
-(6, 1, '-3.00', 'Inventory', '2019-11-19 04:02:59.000000', 1),
-(7, 1, '2.00', 'Inventory', '2019-11-19 14:03:23.000000', 1),
-(8, 4, '1.00', 'Inventory', '2019-11-19 14:03:54.000000', 1),
-(9, 1, '1.00', 'Inventory', '2019-11-19 14:04:39.000000', 1),
-(10, 1, '2.00', 'Inventory', '2019-11-19 14:04:44.000000', 1),
-(11, 1, '-3.00', 'Inventory', '2019-11-19 14:04:59.000000', 1),
-(12, 1, '-34.00', 'Inventory', '2019-11-19 14:06:07.000000', 1),
-(13, 1, '-20.00', 'Inventory', '2019-11-19 14:06:12.000000', 1),
-(14, 3, '-3.00', 'Inventory', '2019-11-19 14:06:20.000000', 1),
-(15, 3, '-5.00', 'Inventory', '2019-11-19 14:06:26.000000', 1);
+INSERT INTO `ledger` (`id`, `inventoryID`, `quantity`, `transaction`, `transactionID`, `remarks`, `timestamp`, `adminID`) VALUES
+(1, 4, '500.00', 'Inventory', NULL, '', '2019-11-19 18:06:20.000000', 1),
+(2, 4, '150.00', 'Inventory', NULL, '', '2019-11-19 18:10:23.000000', 1),
+(3, 5, '-0.50', 'Order', 1, NULL, '2019-11-19 18:11:54.000000', 1),
+(4, 4, '-250.00', 'Order', 1, NULL, '2019-11-19 18:11:54.000000', 1),
+(9, 4, '300.00', 'Inventory', NULL, '', '2019-11-19 18:20:27.000000', 1),
+(10, 5, '-0.50', 'Order', 2, NULL, '2019-11-19 18:20:42.000000', 1),
+(11, 4, '-250.00', 'Order', 2, NULL, '2019-11-19 18:20:42.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -229,6 +223,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `timestamp` timestamp(6) NULL DEFAULT NULL,
   `status` enum('Pending','Canceled','Returned','Delivered') DEFAULT NULL,
   `lastUpdatedStatus` timestamp(6) NULL DEFAULT NULL,
+  `adminID` int(255) NOT NULL,
   PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -236,8 +231,9 @@ CREATE TABLE IF NOT EXISTS `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`, `lastUpdatedStatus`) VALUES
-(1, 2, 1, '2019-11-18 22:40:38.000000', 'Delivered', '2019-11-19 06:20:43.000000');
+INSERT INTO `orders` (`order_id`, `qtyMenu`, `menu_id`, `timestamp`, `status`, `lastUpdatedStatus`, `adminID`) VALUES
+(1, 1, 5, '2019-11-19 18:11:54.000000', 'Pending', NULL, 1),
+(2, 1, 5, '2019-11-19 18:20:42.000000', 'Pending', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -257,12 +253,10 @@ CREATE TABLE IF NOT EXISTS `ordersitems` (
 --
 
 INSERT INTO `ordersitems` (`orderID`, `inventoryID`, `quantity`) VALUES
-(1, 1, '6.00'),
-(1, 2, '2.00'),
-(1, 3, '0.50'),
-(2, 1, '12.00'),
-(2, 2, '4.00'),
-(2, 3, '1.00');
+(1, 5, '0.50'),
+(1, 4, '250.00'),
+(2, 5, '0.50'),
+(2, 4, '250.00');
 
 -- --------------------------------------------------------
 
@@ -310,7 +304,17 @@ CREATE TABLE IF NOT EXISTS `returns` (
   `return_qty` bigint(255) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`return_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `returns`
+--
+
+INSERT INTO `returns` (`return_id`, `inventory_id`, `menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES
+(1, 3, NULL, 'spoilage', '2019-11-19 15:48:47.000000', -1, 'full maggots'),
+(2, 1, NULL, 'spoilage', '2019-11-19 15:49:32.000000', -3, 'it is soy sauce instead'),
+(3, NULL, 1, 'return', '2019-11-19 18:27:20.000000', 1, 'returned'),
+(4, NULL, 7, 'cancel', '2019-11-19 18:29:16.000000', 2, 'full maggots');
 
 -- --------------------------------------------------------
 
@@ -324,7 +328,7 @@ CREATE TABLE IF NOT EXISTS `uom` (
   `uomname` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`uomname`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `uom`

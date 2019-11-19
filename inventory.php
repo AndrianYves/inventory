@@ -1,7 +1,7 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
 <?php
-date_default_timezone_set("Asia/Bangkok");
+
 if(isset($_POST['submit'])){ 
   $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $timestamp = date("Y-m-d H:i:s");
@@ -43,6 +43,7 @@ if (isset($_POST['submitQuantity'])) {
   $inventory = $_POST['inventory'];
   $quantity = $_POST['quantity'];
   $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+  $remarks = mysqli_real_escape_string($conn, $_POST["remarks"]);
   $timestamp = date("Y-m-d H:i:s");
 
   $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE id='$inventory'");
@@ -53,7 +54,7 @@ if (isset($_POST['submitQuantity'])) {
     $_SESSION['success'] = 'Quantity Added';
   }
 
-  $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, timestamp, adminID) VALUES('$inventory', '$quantity', 'Inventory', '$timestamp', '$adminID')"); 
+  $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$inventory', '$quantity', 'Inventory', '$remarks', '$timestamp', '$adminID')"); 
 }
 ?>
 <?php
@@ -202,7 +203,9 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo $row['quantity'];?></td>
                     <td><?php echo strtolower($row['uomname']);?></td>
                     <td><span class="badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span></td>
-                    <td><a data-toggle="modal" data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info btn-sm m-0">Edit</a></td>
+                    <td>
+                        <a data-toggle='modal' data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info"><i class="fas fa-edit"></i></a>
+                    </td>
                   </tr>
                   <div class="modal fade" id="view<?php echo $row['invID']; ?>">
                     <div class="modal-dialog">
@@ -302,15 +305,16 @@ include 'inc/navbar.php'; ?>
                 <table class="table table-bordered table-striped display">
                   <thead>
                   <tr>
+                    <th width="100">Date</th>
                     <th width="150">Item Name</th>
                     <th width="30">Quantity</th>
                     <th width="30">Transaction</th>
-                    <th width="100">Date</th>
                     <th width="100">By</th>
+                    <th width="100">Remarks</th>
                   </tr>
                   </thead>
                        <?php
-                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id");
+                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan, ledger.timestamp as ledTime FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id");
                   while ($row = mysqli_fetch_array($result3)) {
                       if ($row['ledQuan'] < 0){  
                         $color ='red';
@@ -320,11 +324,12 @@ include 'inc/navbar.php'; ?>
                       
                         ?>
                   <tr>
+                    <td><?php echo date("F d, Y H:i", strtotime($row['ledTime']));?></td>
                     <td><?php echo ucwords($row['itemname']);?></td>
                     <td class="text-<?php echo $color;?>"><?php echo $row['ledQuan'];?><?php echo $row['uomname'];?></td>
-                    <td><?php echo ucfirst($row['transaction']);?></td>
-                    <td><?php echo date("F d, Y H:i", strtotime($row['timestamp']));?></td>
+                    <td><?php echo ucfirst($row['transaction']);?> <?php echo $row['transactionID'];?></td>
                     <td><?php echo ucfirst($row['lastname']);?>, <?php echo ucfirst($row['firstname']);?></td>
+                    <td><?php echo ucfirst($row['remarks']);?></td>
                   </tr>
                   <?php   } ?>
 
@@ -444,6 +449,12 @@ include 'inc/navbar.php'; ?>
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity</label>
                     <div class="col-sm-9">
                       <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity">
+                    </div>
+                  </div>
+                   <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-3 col-form-label">Remarks</label>
+                    <div class="col-sm-9">
+                      <textarea class="form-control" rows="3" placeholder="Enter remarks..." name="remarks"></textarea>
                     </div>
                   </div>
                 </div>
