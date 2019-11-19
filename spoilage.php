@@ -2,15 +2,18 @@
 <?php include 'inc/header.php'; ?>
 <?php
 if (isset($_POST['submit'])) {
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $getSpoilageDate = $_POST['spoilage_date'];
   $getItem = $_POST['item_name'];
-  $getItemQty = $_POST['spoilage_qty'];
+  $getItemQty = (-1 * $_POST['spoilage_qty']);
   $getRemarks = $_POST['remarks'];
   $timestamp = date("Y-m-d H:i:s");
 
   $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`inventory_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getItem','spoilage','$timestamp','$getItemQty','$getRemarks')");
 
-  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity`-'$getItemQty' WHERE `id`='$getItem'");
+  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'");
+
+  $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, timestamp, adminID) VALUES('$getItem', '$getItemQty', 'Spoilage', '$timestamp', '$adminID')"); 
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -71,9 +74,9 @@ include 'inc/navbar.php'; ?>
                   ?>
                     <tr>
                       <td><?php echo date('F-j-Y/ g:i A',strtotime($row['return_date']));  ?></td>
-                      <td><?php echo $row['itemname'] ?></td>
-                      <td><?php echo $row['return_qty'] ?></td>
-                      <td><?php echo $row['remarks'] ?></td>
+                      <td><?php echo $row['itemname']; ?></td>
+                      <td><?php echo (-1 * $row['return_qty']); ?></td>
+                      <td><?php echo $row['remarks']; ?></td>
                     </tr>
                     
                   <?php

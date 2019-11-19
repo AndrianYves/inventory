@@ -172,8 +172,8 @@ include 'inc/navbar.php'; ?>
                     <div class="col-sm-9">
                       <select id="two" class="form-control" name="role">
                         <?php $ads = mysqli_query($conn, "SELECT * from admins");?>
-                        <?php foreach($ads as $role): ?>
-                          <option value="<?= $role['id']; ?>"><?= $role['role']; ?></option>
+                        <?php foreach($ads as $adrole): ?>
+                          <option value="<?= $adrole['id']; ?>"><?= $adrole['role']; ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>

@@ -1,6 +1,7 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
 <?php
+date_default_timezone_set("Asia/Bangkok");
 if(isset($_POST['submit'])){ 
   $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $timestamp = date("Y-m-d H:i:s");
@@ -41,14 +42,18 @@ if(isset($_POST['submit'])){
 if (isset($_POST['submitQuantity'])) {
   $inventory = $_POST['inventory'];
   $quantity = $_POST['quantity'];
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+  $timestamp = date("Y-m-d H:i:s");
 
-  $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
+  $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE id='$inventory'");
 
   if ($quantity < 0){
-    $_SESSION['success'] = ''.ucfirst($inventory).' Quantity Subtracted';
+    $_SESSION['success'] = 'Quantity Subtracted'; 
   } else {
-    $_SESSION['success'] = ''.ucfirst($inventory).' Quantity Added';
+    $_SESSION['success'] = 'Quantity Added';
   }
+
+  $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, timestamp, adminID) VALUES('$inventory', '$quantity', 'Inventory', '$timestamp', '$adminID')"); 
 }
 ?>
 <?php
@@ -58,6 +63,7 @@ if (isset($_POST['submit1'])) {
   $itemid = $_POST['itemid'];
   $editcategory = mysqli_real_escape_string($conn, $_POST["editcategory"]);
   $editunit = mysqli_real_escape_string($conn, $_POST["editunit"]);
+  $editlowquantity = mysqli_real_escape_string($conn, $_POST["editlowquantity"]);
 
   if ($editcategory == 'New'){
     $editnewCat = mysqli_real_escape_string($conn, strtolower($_POST["editnewCat"]));
@@ -81,7 +87,7 @@ if (isset($_POST['submit1'])) {
     $unitID = $editunit;
   }
 
-  $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', categoryID='$catID', unitID='$unitID' WHERE id='$itemid'");
+  $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', lowquantity='$editlowquantity', categoryID='$catID', unitID='$unitID' WHERE id='$itemid'");
 
   $_SESSION['success'] = 'Inventory Updated';
 }
@@ -164,7 +170,8 @@ include 'inc/navbar.php'; ?>
                     <th width="200">Description</th>
                     <th width="100">Category</th>
                     <th width="50">Quantity</th>
-                    <th width="30">Unit of Measurement</th>
+                    <th width="30">Unit</th>
+                    <th width="30">Status</th>
                     <th width="50">Action</th>
                   </tr>
                   </thead>
@@ -172,6 +179,20 @@ include 'inc/navbar.php'; ?>
                   <?php
                   $result3 = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory left join category on inventory.categoryID = category.id left join uom on inventory.unitID = uom.id");
                   while ($row = mysqli_fetch_array($result3)) {
+                      if ($row['lowquantity'] >= $row['quantity']){  
+                        if ($row['quantity'] != 0){
+                          $status ='warning';
+                          $statustext ='Low';
+                        } else{
+                          $status ='danger';
+                          $statustext ='Empty';
+                        }
+                      } else {
+                        $status ='success';
+                        $statustext ='Normal';
+                      }
+                      
+                
                         ?>
                   <tr>
                     <td><?php echo $row['invID'];?></td>
@@ -180,6 +201,7 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo ucwords($row['categoryname']);?></td>
                     <td><?php echo $row['quantity'];?></td>
                     <td><?php echo strtolower($row['uomname']);?></td>
+                    <td><span class="badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span></td>
                     <td><a data-toggle="modal" data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info btn-sm m-0">Edit</a></td>
                   </tr>
                   <div class="modal fade" id="view<?php echo $row['invID']; ?>">
@@ -237,6 +259,12 @@ include 'inc/navbar.php'; ?>
                                   <input type="text" class="form-control" id="edituom<?php echo $row['invID']; ?>" name="editnewUnit" value="<?php echo $row['uomname']; ?>">
                                 </div>
                               </div>
+                              <div class="form-group row">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Low Stock Notification</label>
+                                <div class="col-sm-8">
+                                  <input type="text" class="form-control" value="<?php echo $row['lowquantity']; ?>" name="editlowquantity">
+                                </div>
+                              </div>
                             </div>
                             <!-- /.card-body -->
                           
@@ -276,13 +304,30 @@ include 'inc/navbar.php'; ?>
                   <tr>
                     <th width="150">Item Name</th>
                     <th width="30">Quantity</th>
-                    <th width="30">Unit of Measurement</th>
-                    <th width="100">Remarks</th>
+                    <th width="30">Transaction</th>
+                    <th width="100">Date</th>
+                    <th width="100">By</th>
                   </tr>
                   </thead>
-                  <tbody>
+                       <?php
+                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id");
+                  while ($row = mysqli_fetch_array($result3)) {
+                      if ($row['ledQuan'] < 0){  
+                        $color ='red';
+                      } else {
+                        $color ='green';
+                      }
+                      
+                        ?>
+                  <tr>
+                    <td><?php echo ucwords($row['itemname']);?></td>
+                    <td class="text-<?php echo $color;?>"><?php echo $row['ledQuan'];?><?php echo $row['uomname'];?></td>
+                    <td><?php echo ucfirst($row['transaction']);?></td>
+                    <td><?php echo date("F d, Y H:i", strtotime($row['timestamp']));?></td>
+                    <td><?php echo ucfirst($row['lastname']);?>, <?php echo ucfirst($row['firstname']);?></td>
+                  </tr>
+                  <?php   } ?>
 
-                  </tbody>
                 </table>
               </div>
               <!-- /.card-body -->
@@ -307,19 +352,19 @@ include 'inc/navbar.php'; ?>
                 <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                 <div class="card-body">
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
-                    <div class="col-sm-9">
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Item Name</label>
+                    <div class="col-sm-8">
                       <input type="text" class="form-control" placeholder="Name" name="itemname" required>
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Description</label>
-                    <div class="col-sm-9">
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Description</label>
+                    <div class="col-sm-8">
                       <textarea class="form-control" rows="3" placeholder="Enter Description..." name="description" required></textarea>
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Category</label>
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Category</label>
                     <div class="col-sm-5">
                       <select id="three" class="form-control" name="category">
                         <option value="New">Create Category</option>
@@ -329,12 +374,12 @@ include 'inc/navbar.php'; ?>
                         <?php endforeach; ?>
                       </select>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                       <input type="text" class="form-control" id="inputCategory" name="newCat" placeholder="Category">
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Unit of Measurement</label>
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Unit of Measurement</label>
                     <div class="col-sm-5">
                       <select id="four" class="form-control" name="unit">
                         <option value="New">Create Unit</option>
@@ -344,13 +389,13 @@ include 'inc/navbar.php'; ?>
                         <?php endforeach; ?>
                       </select>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                       <input type="text" class="form-control" id="inputUnit" name="newUnit" placeholder="Unit">
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Set Low Stock Notifications</label>
-                    <div class="col-sm-9">
+                    <label for="inputEmail3" class="col-sm-4 col-form-label">Set Low Stock Notifications</label>
+                    <div class="col-sm-8">
                       <input  type="text" class="form-control" name="low">
                     </div>
                   </div>
@@ -386,10 +431,11 @@ include 'inc/navbar.php'; ?>
                     <h5 class="text-danger">Note: Input negative number to subtract quantity.</h5>
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
                     <div class="col-sm-9">
+                      <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                       <select class="form-control" name="inventory">
                         <?php $inventory = mysqli_query($conn, "SELECT * from inventory");?>
                         <?php foreach($inventory as $inv): ?>
-                          <option value="<?= $inv['itemname']; ?>"><?= ucfirst($inv['itemname']); ?></option>
+                          <option value="<?= $inv['id']; ?>"><?= ucfirst($inv['itemname']); ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>
@@ -397,7 +443,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" placeholder="Quantity" name="quantity">
+                      <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity">
                     </div>
                   </div>
                 </div>

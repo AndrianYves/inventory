@@ -39,7 +39,7 @@ if (isset($_POST['updateOrder'])) {
 
   $result1 = mysqli_query($conn,"UPDATE orders SET status='$delivered', lastUpdatedStatus='$lastUpdatedStatus' WHERE order_id='$orderID'");
 
-  $_SESSION['success'] = 'Order  Updated';
+  $_SESSION['success'] = 'Order Created';
 }
 ?>
 <body class="hold-transition sidebar-mini">

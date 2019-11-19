@@ -16,27 +16,36 @@
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
           <i class="far fa-bell"></i>
-          <span class="badge badge-danger navbar-badge">15</span>
+        <?php
+        $result3 = mysqli_query($conn, "SELECT count(*) as counted FROM inventory where lowquantity >= quantity or quantity = 0");
+         $row1 = mysqli_fetch_assoc($result3);
+         $counted = $row1['counted'];
+         echo '<span class="badge badge-danger navbar-badge">'.$counted.'</span>';
+        ?>     
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-header">15 Notifications</span>
+        <?php
+        echo '<span class="dropdown-header">'.$counted.' Notifications</span>';
+        $result4 = mysqli_query($conn, "SELECT * FROM inventory where lowquantity >= quantity or quantity = 0");
+        while ($row = mysqli_fetch_array($result4)) {
+            if ($row['lowquantity'] >= $row['quantity']){  
+              if ($row['quantity'] != 0){
+                $status ='warning';
+                $statustext ='LOW';
+              } else{
+                $status ='danger';
+                $statustext ='EMPTY';
+              }
+            }
+        ?>
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
+            <i class="nav-icon fas fa-th mr-2"></i> <?php echo $row['quantity'];?> <?php echo ucwords($row['itemname']);?>
+            <span class="float-right badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span>
           </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+        <?php } ?>
+
+
         </div>
       </li>
       <li class="nav-item">
