@@ -9,6 +9,8 @@ if (isset($_POST['submit'])) {
   $timestamp = date("Y-m-d H:i:s");
 
   $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`inventory_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getItem','spoilage','$timestamp','$getItemQty','$getRemarks')");
+
+  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity`-'$getItemQty' WHERE `id`='$getItem'");
 }
 ?>
 <body class="hold-transition sidebar-mini">
