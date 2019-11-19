@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Nov 19, 2019 at 07:31 PM
+-- Generation Time: Nov 19, 2019 at 08:03 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -101,11 +101,11 @@ CREATE TABLE IF NOT EXISTS `inventory` (
 --
 
 INSERT INTO `inventory` (`id`, `itemname`, `description`, `quantity`, `lowquantity`, `categoryID`, `unitID`, `timestamp`, `adminID`) VALUES
-(1, 'green apple', 'green from japan', '1.49', '12.00', 2, 1, '2019-11-16 12:37:08.000000', 1),
+(1, 'green apple', 'green from japan', '6.99', '12.00', 2, 1, '2019-11-16 12:37:08.000000', 1),
 (2, 'chicken', 'full grown', '0.00', '3.00', 1, 1, '2019-11-16 12:39:47.000000', 1),
 (3, 'vinegar', 'vinegar 1l', '0.00', '5.00', 3, 4, '2019-11-16 12:51:31.000000', 1),
-(4, 'purified water', 'purified water for drinks recipe.', '50.00', '5.00', 4, 5, '2019-11-17 02:49:00.000000', 1),
-(5, 'watermelon', 'fresh from pampanga.', '258.00', '10.00', 2, 1, '2019-11-17 02:49:17.000000', 1),
+(4, 'purified water', 'purified water for drinks recipe.', '3800.00', '5.00', 4, 5, '2019-11-17 02:49:00.000000', 1),
+(5, 'watermelon', 'fresh from pampanga.', '6.50', '10.00', 2, 1, '2019-11-17 02:49:17.000000', 1),
 (6, 'lemon', 'dole lemons.', '10.50', '5.00', 2, 1, '2019-11-17 02:49:41.000000', 1);
 
 -- --------------------------------------------------------
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `ledger` (
   `timestamp` timestamp(6) NOT NULL,
   `adminID` int(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `ledger`
@@ -138,7 +138,29 @@ INSERT INTO `ledger` (`id`, `inventoryID`, `quantity`, `transaction`, `transacti
 (4, 4, '-250.00', 'Order', 1, NULL, '2019-11-19 18:11:54.000000', 1),
 (9, 4, '300.00', 'Inventory', NULL, '', '2019-11-19 18:20:27.000000', 1),
 (10, 5, '-0.50', 'Order', 2, NULL, '2019-11-19 18:20:42.000000', 1),
-(11, 4, '-250.00', 'Order', 2, NULL, '2019-11-19 18:20:42.000000', 1);
+(11, 4, '-250.00', 'Order', 2, NULL, '2019-11-19 18:20:42.000000', 1),
+(14, 5, '-250.00', 'Inventory', NULL, '', '2019-11-19 18:38:09.000000', 1),
+(15, 5, '-2.00', 'Spoilage', NULL, 'full maggots', '2019-11-19 18:41:45.000000', 1),
+(16, 5, '-1.00', 'Spoilage', NULL, 'awdwd', '2019-11-19 18:43:47.000000', 1),
+(17, 5, '-1.00', 'Spoilage', NULL, 'water', '2019-11-19 18:46:08.000000', 1),
+(18, 5, '-1.00', 'Spoilage', NULL, 'awdwaad', '2019-11-19 18:47:29.000000', 1),
+(19, 1, '0.50', 'Cancel', NULL, 'wd', '2019-11-19 18:48:33.000000', 1),
+(20, 5, '0.50', 'Cancel', NULL, 'wd', '2019-11-19 18:48:33.000000', 1),
+(21, 4, '500.00', 'Cancel', NULL, 'wd', '2019-11-19 18:48:33.000000', 1),
+(22, 1, '0.50', 'Cancel', NULL, 'tfhth', '2019-11-19 18:50:27.000000', 1),
+(23, 5, '0.50', 'Cancel', NULL, 'tfhth', '2019-11-19 18:50:27.000000', 1),
+(24, 4, '500.00', 'Cancel', NULL, 'tfhth', '2019-11-19 18:50:27.000000', 1),
+(25, 1, '2.00', 'Cancel', NULL, 'full maggots', '2019-11-19 18:55:09.000000', 1),
+(26, 4, '250.00', 'Cancel', NULL, 'full maggots', '2019-11-19 18:55:09.000000', 1),
+(27, 1, '0.50', 'Cancel', NULL, 'aw', '2019-11-19 18:56:34.000000', 1),
+(28, 5, '0.50', 'Cancel', NULL, 'aw', '2019-11-19 18:56:34.000000', 1),
+(29, 4, '500.00', 'Cancel', NULL, 'aw', '2019-11-19 18:56:34.000000', 1),
+(30, 1, '0.50', 'Cancel', NULL, 'qqqqq', '2019-11-19 18:56:45.000000', 1),
+(31, 5, '0.50', 'Cancel', NULL, 'qqqqq', '2019-11-19 18:56:45.000000', 1),
+(32, 4, '500.00', 'Cancel', NULL, 'qqqqq', '2019-11-19 18:56:45.000000', 1),
+(33, 3, '0.25', 'Return', NULL, 'full maggots', '2019-11-19 19:02:16.000000', 1),
+(34, 5, '0.50', 'Return', NULL, 'full maggots', '2019-11-19 19:02:16.000000', 1),
+(35, 4, '0.25', 'Return', NULL, 'full maggots', '2019-11-19 19:02:16.000000', 1);
 
 -- --------------------------------------------------------
 
@@ -303,18 +325,21 @@ CREATE TABLE IF NOT EXISTS `returns` (
   `return_date` timestamp(6) NULL DEFAULT NULL,
   `return_qty` bigint(255) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
+  `timestamp` timestamp(6) NOT NULL,
+  `adminID` int(255) NOT NULL,
   PRIMARY KEY (`return_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `returns`
 --
 
-INSERT INTO `returns` (`return_id`, `inventory_id`, `menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES
-(1, 3, NULL, 'spoilage', '2019-11-19 15:48:47.000000', -1, 'full maggots'),
-(2, 1, NULL, 'spoilage', '2019-11-19 15:49:32.000000', -3, 'it is soy sauce instead'),
-(3, NULL, 1, 'return', '2019-11-19 18:27:20.000000', 1, 'returned'),
-(4, NULL, 7, 'cancel', '2019-11-19 18:29:16.000000', 2, 'full maggots');
+INSERT INTO `returns` (`return_id`, `inventory_id`, `menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`, `timestamp`, `adminID`) VALUES
+(1, 5, NULL, 'spoilage', '2019-11-19 18:47:29.000000', -1, 'awdwaad', '2019-11-19 18:47:29.000000', 1),
+(2, NULL, 4, 'cancel', '2019-11-19 18:55:09.000000', 34, 'full maggots', '2019-11-19 18:55:09.000000', 1),
+(3, NULL, 6, 'cancel', '2019-11-19 18:56:34.000000', 1, 'aw', '2019-11-19 18:56:34.000000', 1),
+(4, NULL, 6, 'cancel', '2019-11-19 18:56:45.000000', 1, 'qqqqq', '2019-11-19 18:56:45.000000', 1),
+(5, NULL, 8, 'return', '2019-11-19 19:02:16.000000', 1, 'returned', '2019-11-19 19:02:16.000000', 1);
 
 -- --------------------------------------------------------
 

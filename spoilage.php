@@ -13,7 +13,7 @@ if (isset($_POST['submit'])) {
   $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'") or ($_SESSION['error'] = 'Quantity is below zero.' and $error = true);
 
   if(!$error){
-    $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`inventory_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getItem','spoilage','$timestamp','$getItemQty','$getRemarks')");
+    $insertReturn = mysqli_query($conn, "INSERT INTO returns(inventory_id, return_type, return_date, return_qty, remarks, timestamp, adminID) VALUES ('$getItem', 'spoilage', '$timestamp', '$getItemQty', '$getRemarks', '$timestamp', '$adminID')");
 
     $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getItem', '$getItemQty', 'Spoilage', '$getRemarks', '$timestamp', '$adminID')"); 
 
@@ -99,8 +99,8 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllSpoilage = mysqli_query($conn, "SELECT * FROM forkndagger.returns
-                  JOIN inventory ON inventory_id = inventory.id");
+                  $getAllSpoilage = mysqli_query($conn, "SELECT * FROM returns
+                  JOIN inventory ON returns.inventory_id = inventory.id");
                   while($row = mysqli_fetch_assoc($getAllSpoilage)) {
                   ?>
                     <tr>

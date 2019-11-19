@@ -6,8 +6,9 @@ if (isset($_POST['submit'])) {
   $getQuantity = $_POST['cancel_qty'];
   $timestamp = date("Y-m-d H:i:s");
   $getRemarks = $_POST['remarks'];
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
 
-  $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getMenuName','cancel','$timestamp', '$getQuantity','$getRemarks')");
+  $insertReturn = mysqli_query($conn, "INSERT INTO returns(menu_id, return_type, return_date, return_qty, remarks, timestamp, adminID) VALUES ('$getMenuName', 'cancel', '$timestamp', '$getQuantity', '$getRemarks', '$timestamp', '$adminID')");
 
   $queryQuantity = mysqli_query($conn, "SELECT * FROM menuitems JOIN menu ON menuID = menu.id WHERE menuID = '$getMenuName'");
 
@@ -16,6 +17,8 @@ if (isset($_POST['submit'])) {
     $getQty = $execQuantity['quantity'];
 
     $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity`+'$getQty' WHERE `id`='$getInvId'");
+
+    $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getInvId', '$getQty', 'Cancel', '$getRemarks', '$timestamp', '$adminID')") or die(mysql_error($conn));
   }
 
 }
@@ -71,9 +74,9 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllCancel = mysqli_query($conn, "SELECT * FROM forkndagger.returns
-                  JOIN menu ON menu_id=menu.id
-                  WHERE return_type = 'cancel'");
+                  $getAllCancel = mysqli_query($conn, "SELECT * FROM returns
+                  JOIN menu ON returns.menu_id=menu.id
+                  WHERE returns.return_type = 'cancel'");
                   while($row = mysqli_fetch_assoc($getAllCancel)) {
                   ?>
                     <tr>

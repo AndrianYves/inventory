@@ -5,8 +5,21 @@ if (isset($_POST['submit'])) {
   $getMenuName = $_POST['return_name'];
   $getQuantity = $_POST['return_qty'];
   $timestamp = date("Y-m-d H:i:s");
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+  $getRemarks = $_POST['remarks'];
 
-  $insertReturn = mysqli_query($conn, "INSERT INTO `returns`(`menu_id`, `return_type`, `return_date`, `return_qty`, `remarks`) VALUES ('$getMenuName','return','$timestamp', '$getQuantity','returned')");
+  $insertReturn = mysqli_query($conn, "INSERT INTO returns(menu_id, return_type, return_date, return_qty, remarks, timestamp, adminID) VALUES ('$getMenuName','return','$timestamp', '$getQuantity','returned', '$timestamp', '$adminID')");
+
+
+   $queryQuantity = mysqli_query($conn, "SELECT * FROM menuitems JOIN menu ON menuID = menu.id WHERE menuID = '$getMenuName'");
+
+  while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
+    $getInvId = $execQuantity['inventoryID'];
+    $getQty = $execQuantity['quantity'];
+
+    $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getInvId', '$getQty', 'Return', '$getRemarks', '$timestamp', '$adminID')") or die(mysql_error($conn));
+  } 
+
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -59,8 +72,8 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllReturn = mysqli_query($conn, "SELECT * FROM forkndagger.returns
-                  JOIN menu ON menu_id=menu.id
+                  $getAllReturn = mysqli_query($conn, "SELECT * FROM returns
+                  JOIN menu ON returns.menu_id=menu.id
                   where return_type = 'return'");
                   while($row = mysqli_fetch_assoc($getAllReturn)) {
                   ?>
@@ -114,7 +127,11 @@ include 'inc/navbar.php'; ?>
                     <div class="form-group col-xs-6">
                     <label for="exampleInputEmail1">Quantity</label>
                     <input type="number" class="form-control" rows="3" name="return_qty" id="return_qty" required>
-                  </div>          
+                  </div>   
+                     <div class="form-group">
+                    <label for="inputEmail3">Remarks</label>
+                    <input type="text" class="form-control" rows="2" name="remarks" id="remarks" required>
+                </div>       
                   </div> 
                 </div>
                 <!-- /.card-body -->
