@@ -348,6 +348,12 @@ include 'inc/navbar.php'; ?>
                       <input type="text" class="form-control" id="inputUnit" name="newUnit" placeholder="Unit">
                     </div>
                   </div>
+                  <div class="form-group row">
+                    <label for="inputEmail3" class="col-sm-3 col-form-label">Set Low Stock Notifications</label>
+                    <div class="col-sm-9">
+                      <input  type="text" class="form-control" name="low">
+                    </div>
+                  </div>
                 </div>
                 <!-- /.card-body -->
               

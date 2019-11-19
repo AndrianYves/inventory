@@ -124,26 +124,25 @@ include 'inc/navbar.php'; ?>
                             <span aria-hidden="true">&times;</span>
                           </button>
                         </div>
-                        <div class="modal-body">
-                          <form role="form" action="menu.php" method="POST">               
+                        <div class="modal-body">              
                            <div class="card-body">
                               <div class="form-group">
                                 <label for="exampleInputEmail1">Menu Name</label>
-                                <input type="text" class="form-control" name="menuName" value="<?php echo $row['name']; ?>">
+                                <p><?php echo $row['name']; ?></p>
                               </div>
                               <div class="form-group">
                                 <label for="exampleInputEmail1">Description</label>
-                                <input class="form-control" rows="3" value="<?php echo $row['description']; ?>">
+                                <p><?php echo $row['description']; ?></p>
                               </div>
                               <label for="inputEmail3" class="col-sm-4 col-form-label">Recipe</label>
                               <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
                               <?php foreach($cat as $category): ?>
-                              <div class="form-group row">
+                              <div class="row">
                                 <div class="col-sm-4">
-                                  <input type="text" class="form-control" value="<?= ucfirst($category['itemname']); ?>">
+                                  <p><?= ucfirst($category['itemname']); ?></p>
                                 </div>
                                 <div class="col-sm-4">
-                                  <input type="text" class="form-control" value="<?= ucfirst($category['quantity']); ?> <?= ucfirst($category['uomname']); ?>">
+                                  <p><?= ucfirst($category['quantity']); ?> <?= ucfirst($category['uomname']); ?></p>
                                 </div>
                               </div>
                                 <?php endforeach; ?>
@@ -152,7 +151,6 @@ include 'inc/navbar.php'; ?>
                             <!-- /.card-body -->
                           
                         </div>
-                        </form>
                       </div>
                       <!-- /.modal-content -->
                     </div>
