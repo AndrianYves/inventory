@@ -99,8 +99,8 @@ include 'inc/navbar.php'; ?>
                   <thead>
                   <tr>
                     <th width="120">Menu Name</th>
-                    <th width="200">Description</th>
-                    <th width="50">Action</th>
+                    <th width="220">Description</th>
+                    <th width="40">Action</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -111,11 +111,58 @@ include 'inc/navbar.php'; ?>
                   <tr>
                     <td><?php echo ucwords($row['name']);?></td>
                     <td><?php echo ucfirst($row['description']);?></td>
-                    <td>
-                      <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'>View</button>
-                      <button type="button" class="btn btn-block btn-danger" data-toggle="modal" data-target='#delete<?php echo $row['id']; ?>'>Delete</button>
+                    <td align="center">
+                      <button type="button" class="btn btn-info" data-toggle="modal" data-target='#view<?php echo $row['id']; ?>'><i class="fa fa-eye"></i></button>
+                      <button type="button" class="btn btn-danger" data-toggle="modal" data-target='#delete<?php echo $row['id']; ?>'><i class="fa fa-times"></i></button>
+                      <button type="button" class="btn btn-primary" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'><i class="fa fa-pencil"></i></button>
                     </td>
                   </tr>
+
+                  <div class="modal fade" id="edit<?php echo $row['id']; ?>">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Edit menu</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                           <div class="card-body">
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Menu Name</label>
+                                <input type="text" name="editMenuName" class="form-control" value="<?php echo $row['name']; ?>">
+                              </div>
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Description</label>
+                                <input type="text" name="editMenuDesc" class="form-control" value="<?php echo $row['description']; ?>">
+                              </div>
+                              <label for="inputEmail3" class="col-sm-4 col-form-label">Recipe</label>
+                              <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
+                              <?php foreach($cat as $category): ?>
+                              <div class="row">
+                                <div class="col-sm-4">
+                                  <p><?= ucfirst($category['itemname']); ?></p>
+                                </div>
+                                <div class="col-sm-4">
+                                  <p><?= ucfirst($category['quantity']); ?> <?= ucfirst($category['uomname']); ?></p>
+                                </div>
+                              </div>
+                                <?php endforeach; ?>
+
+                            </div>
+                            <!-- /.card-body -->
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-danger mr-auto" data-dismiss="modal">Cancel</button>
+                              <button type="button" class="btn btn-success" data-dismiss="modal" id="confEdit" data-id="<?php echo $row['id']; ?>">Update</button>
+                            </div>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
 
                   <div class="modal fade" id="delete<?php echo $row['id']; ?>">
                     <div class="modal-dialog">
@@ -130,6 +177,13 @@ include 'inc/navbar.php'; ?>
                            <div class="card-body">
                               <div class="form-group">
                                 <label for="exampleInputEmail1">Are you sure you want to delete this? Deleting this menu will be permanent.</label>
+                              </div>
+                              <div class="form-group">
+                                <?php
+                                $getMenuName = mysqli_query($conn, "SELECT name FROM menu WHERE id = ".$row['id']."");
+                                $fetchRow = mysqli_fetch_assoc($getMenuName);
+                                ?>
+                                <label for="exampleInputEmail1">Menu name: <?php echo $fetchRow['name']; ?></label>
                               </div>
                             </div>
                             <!-- /.card-body -->
@@ -147,7 +201,7 @@ include 'inc/navbar.php'; ?>
                   </div>
                   <!-- /.modal -->
 
-                  <div class="modal fade" id="edit<?php echo $row['id']; ?>">
+                  <div class="modal fade" id="view<?php echo $row['id']; ?>">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <div class="modal-header">
@@ -300,6 +354,27 @@ $(document).ready(function(){
   
 });
 
+$(document).on('click', '#confEdit', function() {
+  var getEditId = $('#confEdit').data("id");
+  var getEditName = $('.editMenuName').val();
+  var getEditDesc = $('.editMenuDesc').val();
+  $.ajax ({
+    type: 'POST',
+    url: 'menu.php',
+    data: {
+      'getEditId': getEditId,
+      'getEditName': getEditName,
+      'getEditDesc': getEditDesc,
+    }, success: function(data) {
+      
+      location.reload(); 
+    }, error: function(data2) {
+      
+      location.reload(); 
+    }
+  });
+});
+
 $(document).on('click', '#confDelete', function() {
   var getMenuId = $('#confDelete').data("id");
   $.ajax ({
@@ -319,6 +394,14 @@ $(document).on('click', '#confDelete', function() {
 </script>
 
 <?php
+if (isset($_POST['getEditId'])) {
+  $getEditVal = $_POST['getEditId'];
+  $getEditName = $_POST['getEditName'];
+  $getEditDesc = $_POST['getEditDesc'];
+  if ($getEditVal != 0) {
+    # code...
+  }
+}
 if (isset($_POST['getMenuId'])) {
   $getVal = $_POST['getMenuId'];
   if ($getVal != 0) {
