@@ -113,8 +113,40 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo ucfirst($row['description']);?></td>
                     <td>
                       <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'>View</button>
+                      <button type="button" class="btn btn-block btn-danger" data-toggle="modal" data-target='#delete<?php echo $row['id']; ?>'>Delete</button>
                     </td>
                   </tr>
+
+                  <div class="modal fade" id="delete<?php echo $row['id']; ?>">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                           <div class="card-body">
+                              <div class="form-group">
+                                <label for="exampleInputEmail1">Are you sure you want to delete this? Deleting this menu will be permanent.</label>
+                              </div>
+                            </div>
+                            <!-- /.card-body -->
+
+                          <div class="modal-footer" align="center">
+                            <button type="button" class="btn btn-success mr-auto" data-dismiss="modal">No</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" id="confDelete" data-id="<?php echo $row['id']; ?>">Yes</button>
+                          </div>
+                          <!-- /.modal-footer -->
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
                   <div class="modal fade" id="edit<?php echo $row['id']; ?>">
                     <div class="modal-dialog">
                       <div class="modal-content">
@@ -268,6 +300,32 @@ $(document).ready(function(){
   
 });
 
+$(document).on('click', '#confDelete', function() {
+  var getMenuId = $('#confDelete').data("id");
+  $.ajax ({
+    type: 'POST',
+    url: 'menu.php',
+    data: {
+      'getMenuId': getMenuId,
+    }, success: function(data) {
+      alert('Success! Menu has been deleted.');
+      location.reload(); 
+    }, error: function(data2) {
+      alert('Error! Menu was not deleted.');
+      location.reload(); 
+    }
+  });
+});
 </script>
+
+<?php
+if (isset($_POST['getMenuId'])) {
+  $getVal = $_POST['getMenuId'];
+  if ($getVal != 0) {
+    $execQuery = mysqli_query($conn, "DELETE FROM `menu` WHERE id = '$getVal'");
+    $execSecQuery = mysqli_query($conn, "DELETE FROM `menuitems` WHERE menuID = '$getVal'");
+  }
+}
+?>
 </body>
 </html>
