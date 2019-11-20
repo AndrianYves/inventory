@@ -1,28 +1,5 @@
 <?php include 'inc/session.php'; ?>
 <?php include 'inc/header.php'; ?>
-<?php
-if (isset($_POST['submit'])) {
-  $getMenuName = $_POST['menu_name'];
-  $getQuantity = $_POST['cancel_qty'];
-  $timestamp = date("Y-m-d H:i:s");
-  $getRemarks = $_POST['remarks'];
-  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
-
-  $insertReturn = mysqli_query($conn, "INSERT INTO returns(menu_id, return_type, return_date, return_qty, remarks, timestamp, adminID) VALUES ('$getMenuName', 'cancel', '$timestamp', '$getQuantity', '$getRemarks', '$timestamp', '$adminID')");
-
-  $queryQuantity = mysqli_query($conn, "SELECT * FROM menuitems JOIN menu ON menuID = menu.id WHERE menuID = '$getMenuName'");
-
-  while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
-    $getInvId = $execQuantity['inventoryID'];
-    $getQty = $execQuantity['quantity'];
-
-    $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity`+'$getQty' WHERE `id`='$getInvId'");
-
-    $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getInvId', '$getQty', 'Cancel', '$getRemarks', '$timestamp', '$adminID')") or die(mysql_error($conn));
-  }
-
-}
-?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php
@@ -55,36 +32,71 @@ include 'inc/navbar.php'; ?>
         <div class="row">
           <div class="col-12">
             <div class="card">
-              <div class="card-header">
-                <div class="row">
-                  <div class="col-3">
-                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Add new cancel order</button>
-                  </div>
-                </div>
-              </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table class="table table-bordered table-striped display">
+               <table class="table table-bordered table-striped display">
                   <thead>
                   <tr>
-                    <th width="120">Menu name</th>
-                    <th width="150">Menu quantity</th>
+                    <th width="160">Date</th>
+                    <th width="120">Order Number</th>
                     <th width="50">Remarks</th>
+                    <th width="50">Action</th>
                   </tr>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllCancel = mysqli_query($conn, "SELECT * FROM returns
-                  JOIN menu ON returns.menu_id=menu.id
-                  WHERE returns.return_type = 'cancel'");
-                  while($row = mysqli_fetch_assoc($getAllCancel)) {
+                  $getAllOrders = mysqli_query($conn, "SELECT * FROM `orders` join ledger on orders.order_id = ledger.transactionID where status = 'Canceled' and ledger.transaction = 'Canceled' group by orders.order_id");
+                  while($row = mysqli_fetch_assoc($getAllOrders)) {
                   ?>
                     <tr>
-                      <td><?php echo $row['name']; ?></td>
-                      <td><?php echo $row['return_qty']; ?></td>
+                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['timestamp']));  ?></td>
+                      <td><?php echo $row['order_id']; ?></td>
                       <td><?php echo $row['remarks']; ?></td>
+                      <td>
+                        <button type="button" class="btn btn-info btn-sm m-0" data-toggle="modal" data-target="#viewOrder<?php echo $row['order_id'] ?>">View Order</button>
+                      </td>
                     </tr>
-                    
+
+                    <div class="modal fade" id="viewOrder<?php echo $row['order_id'] ?>">
+                      <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h4 class="modal-title">Orders</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+
+                            <form action="order.php" method="POST">
+                              <input class="form-check-input" type="hidden" name="updateOrderID" id="updateOrderID" value="<?php echo $row['order_id'];?>" style="visibility: hidden;">
+                              <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
+                              <div class="card-body">
+                                  <dt>Recipe</dt>
+                                  <?php 
+                                     $getAllmenu = mysqli_query($conn, "SELECT * from orderlist join menu on menu.id = orderlist.menuID where orderlist.orderID = '".$row['order_id']."'");
+                                    while($row1 = mysqli_fetch_assoc($getAllmenu)) {
+     
+                                  ?>
+                                  <dl>
+                                    <dd><?php echo ucwords($row1['name']); ?> <?php echo $row1['quantity']; ?></dd>
+                                  </dl>
+                                     <?php
+                                        }
+                                        ?>
+                              </div>
+
+
+                            
+                          </div>
+
+                          </form>
+                        </div>
+                        <!-- /.modal-content -->
+                      </div>
+                      <!-- /.modal-dialog -->
+                    </div>
+                    <!-- /.modal -->
                   <?php
                   }
                   ?>
@@ -101,54 +113,6 @@ include 'inc/navbar.php'; ?>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-
-  <div class="modal fade" id="item">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Add return order</h4>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form action="" method="POST">
-                <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
-                <div class="card-body cancelOrder">
-                  <?php $cat = mysqli_query($conn, "SELECT *, id as menuID FROM menu");?>
-                  <div class="row">
-                  <div class="form-group col-xs-6">
-                    <label for="exampleInputEmail1">Menu Name</label>
-                    <select class="form-control" name="menu_name" id="menu_name">
-                      <option value="none">Select Menu</option>
-                      <?php foreach($cat as $category): ?>
-                      <option value="<?= $category['menuID']; ?>"><?= ucfirst($category['name']); ?></option>
-                      <?php endforeach; ?>
-                    </select>
-                    </div>
-                    <div class="form-group col-xs-6">
-                    <label for="exampleInputEmail1">Quantity</label>
-                    <input type="number" class="form-control" rows="3" name="cancel_qty" id="cancel_qty" required>
-                  </div>          
-                  </div>
-                </div>
-                <div class="form-group">
-                    <label for="inputEmail3">Remarks</label>
-                    <input type="text" class="form-control" rows="2" name="remarks" id="remarks" required>
-                </div>
-                <!-- /.card-body -->
-            </div>
-            <div class="modal-footer justify-content-between">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" name="submit" value = "Add return order">
-            </div>
-            </form>
-          </div>
-          <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-      </div>
-      <!-- /.modal -->
 
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>

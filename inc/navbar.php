@@ -177,10 +177,26 @@ switch ($role): ?>
             </a>
           </li>
           <li class="nav-item">
+            <a href="inventory.php" class="nav-link <?php if($current == 'inventory') {echo 'active';} ?>" >
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Inventory
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="order.php" class="nav-link <?php if($current == 'order') {echo 'active';} ?>">
               <i class="nav-icon fas fa-receipt"></i>
               <p>
                 Orders
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="menu.php" class="nav-link <?php if($current == 'menu') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-scroll"></i>
+              <p>
+                Menu
               </p>
             </a>
           </li>

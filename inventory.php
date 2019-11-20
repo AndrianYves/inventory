@@ -9,6 +9,7 @@ if(isset($_POST['submit'])){
   $description = mysqli_real_escape_string($conn, strtolower($_POST["description"]));
   $category = mysqli_real_escape_string($conn, $_POST["category"]);
   $unit = mysqli_real_escape_string($conn, $_POST["unit"]);
+  $low = mysqli_real_escape_string($conn, $_POST["low"]);
   $quantity = 0;
 
   if ($category == 'New'){
@@ -33,7 +34,7 @@ if(isset($_POST['submit'])){
     $unitID = $unit;
   }
 
-  $sql = mysqli_query($conn, "INSERT INTO inventory(itemname, description, quantity, categoryID, unitID, timestamp, adminID) VALUES('$itemname', '$description', '$quantity', '$catID', '$unitID', '$timestamp', '$adminID')");   
+  $sql = mysqli_query($conn, "INSERT INTO inventory(itemname, description, quantity, lowquantity, categoryID, unitID, timestamp, adminID) VALUES('$itemname', '$description', '$quantity', '$low', '$catID', '$unitID', '$timestamp', '$adminID')");   
   
   $_SESSION['success'] = 'Item Added';
 }
@@ -247,29 +248,7 @@ include 'inc/navbar.php'; ?>
                                   <input type="text" class="form-control" id="editcat<?php echo $row['invID']; ?>" name="editnewCat" value="<?php echo $row['categoryname']; ?>">
                                 </div>
                               </div>
-                              <div class="form-group row">
-                                <label for="inputEmail3" class="col-sm-4 col-form-label">Unit of Measurement</label>
-                                <div class="col-sm-5">
-                                  <select id="two<?php echo $row['invID']; ?>" class="form-control" name="editunit">
-                                    <option value="New">Create Unit</option>
-                                    <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
-                                    <?php foreach($uom as $unit): ?>
-                                      <option value="<?= $unit['id']; ?>"><?= strtoupper($unit['uomname']); ?></option>
-                                    <?php endforeach; ?>
-                                  </select>
-                                </div>
-                                <div class="col-sm-3">
-                                  <input type="text" class="form-control" id="edituom<?php echo $row['invID']; ?>" name="editnewUnit" value="<?php echo $row['uomname']; ?>">
-                                </div>
-                              </div>
-                              <div class="form-group row">
-                                <label for="inputEmail3" class="col-sm-4 col-form-label">Low Stock Notification</label>
-                                <div class="col-sm-8">
-                                  <input type="text" class="form-control" value="<?php echo $row['lowquantity']; ?>" name="editlowquantity">
-                                </div>
-                              </div>
-                            </div>
-                            <!-- /.card-body -->
+
                           
                         </div>
                         <div class="modal-footer justify-content-between">

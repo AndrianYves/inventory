@@ -69,7 +69,7 @@ include 'inc/navbar.php'; ?>
         <?php if ($role == 'Super User'): ?>
         <div class="row">
           <div class="col-12">
-                        <div class="card card-primary card-outline card-outline-tabs">
+            <div class="card card-primary card-outline card-outline-tabs">
               <div class="card-header p-0 border-bottom-0">
                 <ul class="nav nav-tabs" id="custom-tabs-three-tab" role="tablist">
                   <li class="nav-item">
@@ -176,11 +176,6 @@ include 'inc/navbar.php'; ?>
 
                     </tbody>
                   </table>
-                  <div class="col-12 text-right">
-                    <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#view">Save</button>
-                  </div>
-                     
-
                   </div>
 
                 </div>

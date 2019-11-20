@@ -67,7 +67,7 @@ include 'inc/navbar.php'; ?>
               <div class="icon">
                 <i class="nav-icon fas fa-scroll"></i>
               </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="menu.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -75,14 +75,19 @@ include 'inc/navbar.php'; ?>
             <!-- small box -->
             <div class="small-box bg-success">
               <div class="inner">
-                <h3>150</h3>
+                <?php
+                $sql = "SELECT * FROM orders";
+                $query = mysqli_query($conn, $sql);
+                
+                echo "<h3>".mysqli_num_rows($query)."</h3>";
+                ?>
 
                 <p>New Orders</p>
               </div>
               <div class="icon">
                 <i class="nav-icon fas fa-receipt"></i>
               </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="orders.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -90,14 +95,19 @@ include 'inc/navbar.php'; ?>
             <!-- small box -->
             <div class="small-box bg-warning">
               <div class="inner">
-                <h3>150</h3>
+                <?php
+                $sql = "SELECT * FROM spoilage";
+                $query = mysqli_query($conn, $sql);
+                
+                echo "<h3>".mysqli_num_rows($query)."</h3>";
+                ?>
 
                 <p>Spoilage</p>
               </div>
               <div class="icon">
                 <i class="nav-icon fas fa-fill-drip"></i>
               </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="spoilage.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 

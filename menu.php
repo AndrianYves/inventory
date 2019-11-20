@@ -112,9 +112,9 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo ucwords($row['name']);?></td>
                     <td><?php echo ucfirst($row['description']);?></td>
                     <td align="center">
-                      <button type="button" class="btn btn-info" data-toggle="modal" data-target='#view<?php echo $row['id']; ?>'><i class="fa fa-eye"></i></button>
-                      <button type="button" class="btn btn-danger" data-toggle="modal" data-target='#delete<?php echo $row['id']; ?>'><i class="fa fa-times"></i></button>
-                      <button type="button" class="btn btn-primary" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'><i class="fa fa-pencil"></i></button>
+                      <button type="button" class="btn btn-info" data-toggle="modal" data-target='#view<?php echo $row['id']; ?>'><i class="fas fa-eye"></i></button>
+                      <button type="button" class="btn btn-danger" data-toggle="modal" data-target='#delete<?php echo $row['id']; ?>'><i class="fas fa-trash"></i></button>
+                      <button type="button" class="btn btn-primary" data-toggle="modal" data-target='#edit<?php echo $row['id']; ?>'><i class="fas fa-pencil-alt"></i></button>
                     </td>
                   </tr>
 

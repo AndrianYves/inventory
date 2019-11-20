@@ -13,7 +13,7 @@ if (isset($_POST['submit'])) {
   $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'") or ($_SESSION['error'] = 'Quantity is below zero.' and $error = true);
 
   if(!$error){
-    $insertReturn = mysqli_query($conn, "INSERT INTO returns(inventory_id, return_type, return_date, return_qty, remarks, timestamp, adminID) VALUES ('$getItem', 'spoilage', '$timestamp', '$getItemQty', '$getRemarks', '$timestamp', '$adminID')");
+    $insertReturn = mysqli_query($conn, "INSERT INTO spoilage(inventoryID, quantity, remarks, spoilagedate, timestamp, adminID) VALUES ('$getItem', '$getItemQty', '$getRemarks', '$getSpoilageDate', '$timestamp', '$adminID')") or die(mysqli_error($conn));
 
     $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('$getItem', '$getItemQty', 'Spoilage', '$getRemarks', '$timestamp', '$adminID')"); 
 
@@ -99,14 +99,13 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllSpoilage = mysqli_query($conn, "SELECT * FROM returns
-                  JOIN inventory ON returns.inventory_id = inventory.id");
+                  $getAllSpoilage = mysqli_query($conn, "SELECT *, spoilage.quantity as spoqty FROM spoilage join inventory on inventory.id = spoilage.inventoryID");
                   while($row = mysqli_fetch_assoc($getAllSpoilage)) {
                   ?>
                     <tr>
-                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['return_date']));  ?></td>
+                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['spoilagedate']));  ?></td>
                       <td><?php echo ucwords($row['itemname']); ?></td>
-                      <td><?php echo (-1 * $row['return_qty']); ?></td>
+                      <td><?php echo (-1 * $row['spoqty']); ?></td>
                       <td><?php echo ucfirst($row['remarks']); ?></td>
                     </tr>
                     
@@ -177,7 +176,7 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" name="submit" value = "Add Order">
+              <input type="submit" class="btn btn-primary" name="submit" value = "Save">
             </div>
             </form>
           </div>
