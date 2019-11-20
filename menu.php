@@ -398,8 +398,9 @@ if (isset($_POST['getEditId'])) {
   $getEditVal = $_POST['getEditId'];
   $getEditName = $_POST['getEditName'];
   $getEditDesc = $_POST['getEditDesc'];
+  $getNewTimeStamp = date("Y-m-d H:i:s");
   if ($getEditVal != 0) {
-    # code...
+    $execEdit = mysqli_query($conn, "UPDATE `menu` SET `name`='$getEditName',`description`='$getEditDesc',`timestamp`='$getNewTimeStamp' WHERE `id` = '$getEditVal'");
   }
 }
 if (isset($_POST['getMenuId'])) {
