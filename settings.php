@@ -97,7 +97,6 @@ include 'inc/navbar.php'; ?>
           unset($_SESSION['success']);
         }
       ?>
-      <?php if ($role == 'Super User'): ?>
          <div class="row">
           <div class="col-4">
 
@@ -333,55 +332,6 @@ include 'inc/navbar.php'; ?>
 
 
         </div><!-- /.row -->
-
-        <?php else: ?>
-          <div class="row">
-            <div class="col-5">
-
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">Change Password</h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body" style="height: 300px;">
-                <form role="form" action="settings.php" method="POST">
-                <div class="form-group row">
-                  <label for="currentpassword" class="col-sm-5 col-form-label">Current Password</label>
-                  <div class="col-sm-7">
-                    <input type="password" class="form-control" placeholder="Current Password" name="currentpassword" required>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="newpassword" class="col-sm-5 col-form-label">New Password</label>
-                  <div class="col-sm-7">
-                    <input type="password" class="form-control" placeholder="New Password" name="password" required>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <label for="cpassword" class="col-sm-5 col-form-label">Confirm Password</label>
-                  <div class="col-sm-7">
-                    <input type="password" class="form-control" placeholder="Confirm Password" name="cpassword" required>
-                  </div>
-                </div>
-
-
-
-                <button type="submit" class="btn btn-primary" name="submit2">Change Password</button>
-              </form>
-              </div>
-              <!-- /.card-body -->
-
-            </div>
-            <!-- /.card -->
-
-             </div><!-- /.col -->
-
-
-        </div><!-- /.row -->
-
-
-        <?php endif ?>
-
       </div><!-- /.container-fluid -->
 
     </div>
