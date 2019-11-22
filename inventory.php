@@ -64,8 +64,8 @@ if (isset($_POST['submit1'])) {
   $editdescription = $_POST['editdescription'];
   $itemid = $_POST['itemid'];
   $editcategory = mysqli_real_escape_string($conn, $_POST["editcategory"]);
-  $editunit = mysqli_real_escape_string($conn, $_POST["editunit"]);
-  $editlowquantity = mysqli_real_escape_string($conn, $_POST["editlowquantity"]);
+  // $editunit = mysqli_real_escape_string($conn, $_POST["editunit"]);
+  // $editlowquantity = mysqli_real_escape_string($conn, $_POST["editlowquantity"]);
 
   if ($editcategory == 'New'){
     $editnewCat = mysqli_real_escape_string($conn, strtolower($_POST["editnewCat"]));
@@ -78,18 +78,20 @@ if (isset($_POST['submit1'])) {
     $catID = $editcategory;
   }
 
-  if ($editunit == 'New'){
-    $editnewUnit = mysqli_real_escape_string($conn, strtolower($_POST["editnewUnit"]));
-    $result = mysqli_query($conn, "INSERT INTO uom(uomname) VALUES('$editnewUnit')");
+  // if ($editunit == 'New'){
+  //   $editnewUnit = mysqli_real_escape_string($conn, strtolower($_POST["editnewUnit"]));
+  //   $result = mysqli_query($conn, "INSERT INTO uom(uomname) VALUES('$editnewUnit')");
 
-    $result2 = mysqli_query($conn, "SELECT * FROM uom where `uomname` = '$editnewUnit'");
-    $row = mysqli_fetch_assoc($result2);
-    $unitID = $row['id'];
-  } else {
-    $unitID = $editunit;
-  }
+  //   $result2 = mysqli_query($conn, "SELECT * FROM uom where `uomname` = '$editnewUnit'");
+  //   $row = mysqli_fetch_assoc($result2);
+  //   $unitID = $row['id'];
+  // } else {
+  //   $unitID = $editunit;
+  // }
 
-  $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', lowquantity='$editlowquantity', categoryID='$catID', unitID='$unitID' WHERE id='$itemid'");
+  // $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', categoryID='$catID' WHERE id='$itemid'");
+    $result1 = mysqli_query($conn,"UPDATE inventory SET itemname='$edititemname', description='$editdescription', categoryID='$catID' WHERE id='$itemid'");
+
 
   $_SESSION['success'] = 'Inventory Updated';
 }

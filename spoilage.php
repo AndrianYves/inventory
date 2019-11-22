@@ -147,26 +147,21 @@ include 'inc/navbar.php'; ?>
                         <input type="date" class="form-control" rows="1" name="spoilage_date" id="spoilage_date" required>
                       </div>
                   </div>
-                  <div id="placeHere">
-                    <div class="row">
+                  <div class="row">
+                    <div class="form-group col-xs-6">
+                        <?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
+
+                        <label for="exampleInputEmail1">Item Name</label>
+                        <select class="form-control" name="item_name" id="item_name">
+                        <?php foreach($cat as $category): ?>
+                          <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                      </div>
                       <div class="form-group col-xs-6">
-                          <?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
-                          <label for="exampleInputEmail1">Item Name</label>
-                          <select class="form-control" name="item_name" id="item_name">
-                          <?php foreach($cat as $category): ?>
-                            <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?></option>
-                          <?php endforeach; ?>
-                        </select>
-                        </div>
-                        <div class="form-group col-xs-6">
-                          <label for="exampleInputEmail1">Quantity</label>
-                          <input type="text" class="form-control" rows="1" name="spoilage_qty" id="spoilage_qty" required>
-                        </div>
-                        <div class="form-group col-xs-4">
-                          <label for="exampleInputEmail1" style="visibility: hidden;">Button</label>
-                          <button type="button" class="form-control btn-primary" id="addItem"><i class="fa fa-plus"></i></button>
-                        </div>
-                    </div>
+                        <label for="exampleInputEmail1">Quantity</label>
+                        <input type="text" class="form-control" rows="1" name="spoilage_qty" id="spoilage_qty" required>
+                      </div>
                   </div>
                   <div class="row">
                     <div class="form-group">
@@ -197,37 +192,5 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
-<script type="text/javascript">
-  $(document).ready(function() {
-    var i=1;
-    $('#addItem').click(function() {
-      i++;
-      $('#placeHere').append('<div class="row" id="row'+i+'">'+
-          '<div class="form-group col-xs-6">'+
-          '<?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>'+
-          '<label for="exampleInputEmail1">Item Name</label>'+
-          '<select class="form-control" name="item_name" id="item_name">'+
-            '<?php foreach($cat as $category): ?>'+
-              '<option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?></option>'+
-            '<?php endforeach; ?>'+
-          '</select>'+
-        '</div>'+
-        '<div class="form-group col-xs-6">'+
-          '<label for="exampleInputEmail1">Quantity</label>'+
-          '<input type="text" class="form-control" rows="1" name="spoilage_qty" id="spoilage_qty" required>'+
-        '</div>'+
-        '<div class="form-group col-xs-4">'+
-          '<label for="exampleInputEmail1" style="visibility: hidden;">Button</label>'+
-          '<button type="button" class="form-control btn-danger btn_remove" data-toggle="modal" id="'+i+'"><i class="fa fa-minus"></i></button>'+
-        '</div>'+
-      '</div>');
-    });
-
-    $(document).on('click', '.btn_remove', function(){
-      var button_id = $(this).attr("id");
-      $('#row'+button_id+'').remove();
-    });
-  });
-</script>
 </body>
 </html>
