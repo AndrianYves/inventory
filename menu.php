@@ -27,6 +27,29 @@ if(isset($_POST['submit'])){
     $_SESSION['success'] = 'Item Added';
 }
 ?>
+<?php
+if (isset($_POST['editmenu'])) {
+  $editmenuname = $_POST['editmenuname'];
+  $editmenudesription = $_POST['editmenudesription'];
+  $editmenuid = $_POST['editmenuid'];
+
+  $result1 = mysqli_query($conn,"UPDATE menu SET name='$editmenuname', description='$editmenudesription' WHERE id='$editmenuid'");
+
+
+  $_SESSION['success'] = 'Menu Updated';
+}
+?>
+
+<?php
+if (isset($_POST['deletemenu'])) {
+   $deletemenuid = $_POST['deletemenuid'];
+
+  $result = mysqli_query($conn, "DELETE FROM menu WHERE id='$deletemenuid'");
+  $result1 = mysqli_query($conn, "DELETE FROM menuitems WHERE menuid='$deletemenuid'");
+
+  $_SESSION['success'] = 'Menu Deleted';
+}
+?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
 <?php
@@ -129,12 +152,14 @@ include 'inc/navbar.php'; ?>
                         <div class="modal-body">              
                            <div class="card-body">
                               <div class="form-group">
+                                <form role="form" action="menu.php" method="POST">
                                 <label for="exampleInputEmail1">Menu Name</label>
-                                <input type="text" name="editMenuName" class="form-control" value="<?php echo $row['name']; ?>">
+                                <input type="text" name="editmenuname" class="form-control" value="<?php echo $row['name']; ?>">
+                                <input type="hidden" name="editmenuid" class="form-control" value="<?php echo $row['id']; ?>">
                               </div>
                               <div class="form-group">
                                 <label for="exampleInputEmail1">Description</label>
-                                <input type="text" name="editMenuDesc" class="form-control" value="<?php echo $row['description']; ?>">
+                                <input type="text" name="editmenudesription" class="form-control" value="<?php echo $row['description']; ?>">
                               </div>
                               <label for="inputEmail3" class="col-sm-4 col-form-label">Recipe</label>
                               <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
@@ -153,8 +178,9 @@ include 'inc/navbar.php'; ?>
                             <!-- /.card-body -->
                             <div class="modal-footer">
                               <button type="button" class="btn btn-danger mr-auto" data-dismiss="modal">Cancel</button>
-                              <button type="button" class="btn btn-success" data-dismiss="modal" id="confEdit" data-id="<?php echo $row['id']; ?>">Update</button>
+                              <button type="submit" class="btn btn-success" id="editmenu" name="editmenu">Update</button>
                             </div>
+                            </form>
                         </div>
                       </div>
                       <!-- /.modal-content -->
@@ -175,7 +201,9 @@ include 'inc/navbar.php'; ?>
                         <div class="modal-body">              
                            <div class="card-body">
                               <div class="form-group">
+                                <form role="form" action="menu.php" method="POST">
                                 <label for="exampleInputEmail1">Are you sure you want to delete this? Deleting this menu will be permanent.</label>
+                                <input type="hidden" name="deletemenuid" class="form-control" value="<?php echo $row['id']; ?>">
                               </div>
                               <div class="form-group">
                                 <?php
@@ -189,7 +217,8 @@ include 'inc/navbar.php'; ?>
 
                           <div class="modal-footer" align="center">
                             <button type="button" class="btn btn-success mr-auto" data-dismiss="modal">No</button>
-                            <button type="button" class="btn btn-danger" data-dismiss="modal" id="confDelete" data-id="<?php echo $row['id']; ?>">Yes</button>
+                            <button type="submit" class="btn btn-success" id="deletemenu" name="deletemenu">Yes</button>
+                          </form>
                           </div>
                           <!-- /.modal-footer -->
                         </div>
@@ -350,62 +379,6 @@ $(document).ready(function(){
   
 });
 
-$(document).on('click', '#confEdit', function() {
-  var getEditId = $('#confEdit').data("id");
-  var getEditName = $('.editMenuName').val();
-  var getEditDesc = $('.editMenuDesc').val();
-  $.ajax ({
-    type: 'POST',
-    url: 'menu.php',
-    data: {
-      'getEditId': getEditId,
-      'getEditName': getEditName,
-      'getEditDesc': getEditDesc,
-    }, success: function(data) {
-      
-      location.reload(); 
-    }, error: function(data2) {
-      
-      location.reload(); 
-    }
-  });
-});
-
-$(document).on('click', '#confDelete', function() {
-  var getMenuId = $('#confDelete').data("id");
-  $.ajax ({
-    type: 'POST',
-    url: 'menu.php',
-    data: {
-      'getMenuId': getMenuId,
-    }, success: function(data) {
-      alert('Success! Menu has been deleted.');
-      location.reload(); 
-    }, error: function(data2) {
-      alert('Error! Menu was not deleted.');
-      location.reload(); 
-    }
-  });
-});
 </script>
-
-<?php
-if (isset($_POST['getEditId'])) {
-  $getEditVal = $_POST['getEditId'];
-  $getEditName = $_POST['getEditName'];
-  $getEditDesc = $_POST['getEditDesc'];
-  $getNewTimeStamp = date("Y-m-d H:i:s");
-  if ($getEditVal != 0) {
-    $execEdit = mysqli_query($conn, "UPDATE `menu` SET `name`='$getEditName',`description`='$getEditDesc',`timestamp`='$getNewTimeStamp' WHERE `id` = '$getEditVal'");
-  }
-}
-if (isset($_POST['getMenuId'])) {
-  $getVal = $_POST['getMenuId'];
-  if ($getVal != 0) {
-    $execQuery = mysqli_query($conn, "DELETE FROM `menu` WHERE id = '$getVal'");
-    $execSecQuery = mysqli_query($conn, "DELETE FROM `menuitems` WHERE menuID = '$getVal'");
-  }
-}
-?>
 </body>
 </html>

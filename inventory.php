@@ -206,7 +206,7 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo strtolower($row['uomname']);?></td>
                     <td><span class="badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span></td>
                     <td>
-                        <a data-toggle='modal' data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info"><i class="fas fa-edit"></i></a>
+                        <a data-toggle='modal' data-target='#view' class="btn btn-info"><i class="fas fa-edit"></i></a>
                     </td>
                   </tr>
                   <div class="modal fade" id="view<?php echo $row['invID']; ?>">
@@ -351,7 +351,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Category</label>
                     <div class="col-sm-5">
-                      <select id="three" class="form-control" name="category">
+                      <select id="three" class="form-control" name="category" required>
                         <option value="New">Create Category</option>
                         <?php $cat = mysqli_query($conn, "SELECT * from category");?>
                         <?php foreach($cat as $category): ?>
@@ -360,13 +360,13 @@ include 'inc/navbar.php'; ?>
                       </select>
                     </div>
                     <div class="col-sm-3">
-                      <input type="text" class="form-control" id="inputCategory" name="newCat" placeholder="Category">
+                      <input type="text" class="form-control" id="inputCategory" name="newCat" placeholder="Category" required>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Unit of Measurement</label>
                     <div class="col-sm-5">
-                      <select id="four" class="form-control" name="unit">
+                      <select id="four" class="form-control" name="unit" required>
                         <option value="New">Create Unit</option>
                         <?php $uom = mysqli_query($conn, "SELECT * from uom");?>
                         <?php foreach($uom as $unit): ?>
@@ -375,13 +375,13 @@ include 'inc/navbar.php'; ?>
                       </select>
                     </div>
                     <div class="col-sm-3">
-                      <input type="text" class="form-control" id="inputUnit" name="newUnit" placeholder="Unit">
+                      <input type="text" class="form-control" id="inputUnit" name="newUnit" placeholder="Unit" required>
                     </div>
                   </div>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Set Low Stock Notifications</label>
                     <div class="col-sm-8">
-                      <input  type="text" class="form-control" name="low">
+                      <input  type="number" class="form-control" name="low" required>
                     </div>
                   </div>
                 </div>
