@@ -180,7 +180,7 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $result3 = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory left join category on inventory.categoryID = category.id left join uom on inventory.unitID = uom.id");
+                  $result3 = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory left join category on inventory.categoryID = category.id left join uom on inventory.unitID = uom.id order by inventory.id ASC");
                   while ($row = mysqli_fetch_array($result3)) {
                       if ($row['lowquantity'] >= $row['quantity']){  
                         if ($row['quantity'] != 0){
@@ -206,7 +206,7 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo strtolower($row['uomname']);?></td>
                     <td><span class="badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span></td>
                     <td>
-                        <a data-toggle='modal' data-target='#view' class="btn btn-info"><i class="fas fa-edit"></i></a>
+                        <a data-toggle='modal' data-target='#view<?php echo $row['invID']; ?>' class="btn btn-info"><i class="fas fa-edit"></i></a>
                     </td>
                   </tr>
                   <div class="modal fade" id="view<?php echo $row['invID']; ?>">
@@ -294,7 +294,7 @@ include 'inc/navbar.php'; ?>
                   </tr>
                   </thead>
                        <?php
-                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan, ledger.timestamp as ledTime FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id");
+                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan, ledger.timestamp as ledTime FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id order by ledger.timestamp DESC");
                   while ($row = mysqli_fetch_array($result3)) {
                       if ($row['ledQuan'] < 0){  
                         $color ='red';
@@ -381,7 +381,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Set Low Stock Notifications</label>
                     <div class="col-sm-8">
-                      <input  type="number" class="form-control" name="low" required>
+                      <input  type="number" class="form-control" name="low" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="7" required>
                     </div>
                   </div>
                 </div>
@@ -428,7 +428,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity">
+                      <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="7">
                     </div>
                   </div>
                    <div class="form-group row">

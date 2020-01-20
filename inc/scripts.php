@@ -6,7 +6,9 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-  $('table.display').DataTable();
+  $('table.display').DataTable({
+  	"order": []
+  });
 } );
 </script>
 <script src="plugins/datatables/jquery.dataTables.js"></script>

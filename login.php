@@ -11,16 +11,19 @@
 
 		if($query->num_rows < 1){
 			$_SESSION['error'] = 'Invalid Username/Password';
-		}
-		else{
+		} else {
 			$row = $query->fetch_assoc();
 			if(password_verify($password, $row['password'])){
-				$timestamp = date("Y-m-d H:i:s");
-				$result1 = mysqli_query($conn,"UPDATE admins SET lastlogin='$timestamp' WHERE username='$user'");
-				
-				$_SESSION['admin'] = $row['id'];
-			}
-			else{
+				if($row['status'] == 'Block'){
+					$_SESSION['error'] = 'Accont Block';
+				} else{
+					$timestamp = date("Y-m-d H:i:s");
+					$result1 = mysqli_query($conn,"UPDATE admins SET lastlogin='$timestamp' WHERE username='$user'");
+					
+					$_SESSION['admin'] = $row['id'];
+				}
+
+			} else {
 				$_SESSION['error'] = 'Invalid Username/Password';
 			}
 		}

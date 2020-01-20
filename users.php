@@ -20,11 +20,26 @@ if(isset($_POST['submit'])){
   }
 
 }
+
+  if(isset($_POST['submit1'])){ 
+    $adminsIDS = $_POST['adminsIDS'];
+    $status = 'Active';
+    $sql = mysqli_query($conn,"UPDATE admins SET status = '$status' WHERE id = '$adminsIDS'");
+
+    $_SESSION['success'] = 'Admin account activated.';
+  }
+
+  if(isset($_POST['submit2'])){ 
+    $adminsIDS = $_POST['adminsIDS'];
+    $status = 'Block';
+    $sql = mysqli_query($conn,"UPDATE admins SET status = '$status' WHERE id = '$adminsIDS'");
+
+    $_SESSION['success'] = 'Admin accont block.';
+  }
 ?>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
-<?php
-$current = "users";
+<?php $current = "users";
 include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
@@ -95,6 +110,8 @@ include 'inc/navbar.php'; ?>
                     <th width="200">Email</th>
                     <th width="100">Role</th>
                     <th width="100">Last Login</th>
+                    <th width="100">Status</th>
+                    <th width="100">Action</th>
                   </tr>
                   </thead>
                   <tbody>
@@ -108,10 +125,22 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo $row['email'];?></td>
                     <td><?php echo ucwords($row['role']);?></td>
                     <td><?php echo date("Y-m-d H:i", strtotime($row['lastlogin']));?></td>
+                    <td><?php echo $row['status'];?></td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <form method="POST" action="users.php">
+                        <input class="form-check-input" type="hidden" name="adminsIDS" value="<?php echo $row['id'];?>">
+                        <button class="btn btn-info" name="submit1" type="submit">Activate</button>
+                        </form>
+                        <form method="POST" action="users.php">
+                        <input class="form-check-input" type="hidden" name="adminsIDS" value="<?php echo $row['id'];?>">
+                        <button class="btn btn-danger" name="submit2" type="submit">Block</button>
+                        </form>
+                      </div>
+                    </td>
                   </tr>
           
                   <?php   } ?>
-
                   </tbody>
                 </table>
               </div>
