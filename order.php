@@ -18,7 +18,7 @@ if (isset($_POST['submit'])) {
   for ($i=0; $i < $number; $i++) {
     if (mysqli_real_escape_string($conn, $_POST['qtyMenu'][$i]) < 1){
         $error = true;
-        $_SESSION['error'] = 'Invalid.';
+        $_SESSION['error'][] = 'Invalid.';
       }
 
     $result1 = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan, inventory.id as invID FROM inventory join menuitems on inventory.id = menuitems.inventoryID join menu on menuitems.menuID = menu.id where menu.id = '".$_POST['menuName'][$i]."'");
@@ -37,7 +37,7 @@ if (isset($_POST['submit'])) {
       $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, adminID) VALUES('$inventoryID', '$getItemQty', 'Order', '$orderNumber', '$getTimestamp', '$adminID')");
       if (!$sql2) {
        $error = true;
-       $_SESSION['error'] = 'Not enough Recipe.';
+       $_SESSION['error'][] = 'Not enough Recipe.';
       }
 
      }
@@ -63,36 +63,6 @@ if (isset($_POST['submit'])) {
 
 ?>
 <?php
-if (isset($_POST['updateOrder'])) {
-  $orderStatus = $_POST['orderStatus'];
-  $orderID = $_POST['updateOrderID'];
-  $tablenumber = $_POST['tablenumber'];
-  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
-
-  switch ($orderStatus) {
-    case "Canceled":
-
-        break;
-    case "Returned":
-        $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID'");
-        $remarkCancel = $_POST['remarkCancel'];  
-        while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
-          $getInvId = $execQuantity['inventoryID'];
-          $getQty = $execQuantity['quantity'];
-
-          $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, remarks, adminID) VALUES('$getInvId', '$getQty', 'Returned', '$orderID', '$remarkCancel', '$adminID')") or die(mysqli_error($conn));
-        } 
-        break;
-    default:
-
-  }
-
-  $result1 = mysqli_query($conn,"UPDATE orders SET status='$orderStatus' WHERE order_id='$orderID'");
-  $result2 = mysqli_query($conn,"UPDATE tables SET status='Vacant' WHERE tablenumber='$tablenumber'");
-
-  $_SESSION['success'] = 'Order '.$orderID.' '.$orderStatus;
-}
-
   if(isset($_POST['delivered'])){ 
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
@@ -111,13 +81,28 @@ if (isset($_POST['updateOrder'])) {
   }
 
   if(isset($_POST['canceled'])){ 
+    mysqli_autocommit($conn, false);
+    $error = false;
+
+
     $getTimestamp = date("Y-m-d H:i");
     $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
     $quantitystatus = $_POST['quantitystatus'];
 
+    if(empty($_POST['remarkCancel'])){
+      $error = true;
+      $_SESSION['error'][] = 'Remarks required.';
+    } else {
+       $remarks = $_POST['remarkCancel'];
+    }
+   
+
     $sql = mysqli_query($conn,"UPDATE orderlist SET `total`=total-'$quantitystatus', `canceled_returned_order`=canceled_returned_order+'$quantitystatus' WHERE orderID = '$orderID' and menuID = '$menuID' ");
+
+    $sql3 = mysqli_query($conn, "INSERT INTO orderscancel(orderID, menuID, quantity, remarks, timestamp) VALUES('$orderID', '$menuID', '$quantitystatus', '$remarks', '$getTimestamp')") or die(mysqli_error($conn));
+
     
     $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID'");
     $row = mysqli_fetch_assoc($sql2);
@@ -136,15 +121,76 @@ if (isset($_POST['updateOrder'])) {
     $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, remarks, adminID) VALUES('$getInvId', '$getQty', 'Canceled', '$orderID', '$getTimestamp', '$remarkCancel', '$adminID')") or die(mysqli_error($conn));
   }
 
-    $_SESSION['success'] = 'Order item Canceled.';
+   
+    if (!$error) {
+      mysqli_commit($conn);
+      $_SESSION['success'] = 'Order Canceled.';
+    } else {
+      mysqli_rollback($conn);
+    }
+
   }
 
-  if(isset($_POST['returned'])){ 
-        $getTimestamp = date("Y-m-d H:i");
+  if(isset($_POST['returned1'])){ 
+    mysqli_autocommit($conn, false);
+    $error = false;
+
+    $getTimestamp = date("Y-m-d H:i");
     $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
     $quantitystatus = $_POST['quantitystatus'];
+
+    if(empty($_POST['remarkCancel'])){
+      $error = true;
+          $_SESSION['error'][] = 'Remarks required.';
+    } else {
+       $remarks = $_POST['remarkCancel'];
+    }
+   
+    $sql = mysqli_query($conn,"UPDATE orderlist SET `total`=total-'$quantitystatus', `canceled_returned_order`=canceled_returned_order+'$quantitystatus' WHERE orderID = '$orderID' and menuID = '$menuID' ");
+
+    $sql3 = mysqli_query($conn, "INSERT INTO ordersreturn(orderID, menuID, quantity, remarks, timestamp) VALUES('$orderID', '$menuID', '$quantitystatus', '$remarks', '$getTimestamp')");
+
+    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID'");
+    $row = mysqli_fetch_assoc($sql2);
+    if($row['delivered'] == 0){
+       $sql = mysqli_query($conn,"UPDATE orderlist SET status = 'Returned' WHERE orderID = '$orderID' and menuID = '$menuID' ");
+     }
+
+    $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID'");
+    $remarkCancel = 'Returned';  
+    while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
+      $getInvId = $execQuantity['inventoryID'];
+      $getQty = (($execQuantity['quantity'] / $row['quantity']) * $quantitystatus);
+
+      $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, remarks, adminID) VALUES('$getInvId', '$getQty', 'Returned', '$orderID', '$getTimestamp', '$remarkCancel', '$adminID')") or die(mysqli_error($conn));
+    } 
+
+    if (!$error) {
+      mysqli_commit($conn);
+      $_SESSION['success'] = 'Order returned.';
+    } else {
+      mysqli_rollback($conn);
+    }
+  }
+
+  if(isset($_POST['returned'])){ 
+     mysqli_autocommit($conn, false);
+    $error = false;
+    $getTimestamp = date("Y-m-d H:i");
+    $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+    $orderID = $_POST['orderID'];
+    $menuID = $_POST['menuID'];
+    $quantitystatus = $_POST['quantitystatus'];
+
+    if(empty($_POST['remarkCancel'])){
+      $_SESSION['error'][] = 'Remarks required.';
+    } else {
+       $remarks = $_POST['remarkCancel'];
+    }
+
+    $sql3 = mysqli_query($conn, "INSERT INTO ordersreturn(orderID, menuID, quantity, remarks, timestamp) VALUES('$orderID', '$menuID', '$quantitystatus', '$remarks', '$getTimestamp')");
 
     $sql = mysqli_query($conn,"UPDATE orderlist SET `delivered`=delivered-'$quantitystatus', `canceled_returned_order`=canceled_returned_order+'$quantitystatus' WHERE orderID = '$orderID' and menuID = '$menuID' ");
     
@@ -163,7 +209,12 @@ if (isset($_POST['updateOrder'])) {
       $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, remarks, adminID) VALUES('$getInvId', '$getQty', 'Returned', '$orderID', '$getTimestamp', '$remarkCancel', '$adminID')") or die(mysqli_error($conn));
     } 
 
-    $_SESSION['success'] = 'Order item returned.';
+    if (!$error) {
+      mysqli_commit($conn);
+      $_SESSION['success'] = 'Order returned.';
+    } else {
+      mysqli_rollback($conn);
+    }
   }
 
   if(isset($_POST['completeorder'])){ 
@@ -204,28 +255,6 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container">
-      <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
         <div class="row">
           <div class="col-12">
             <div class="card">
@@ -254,9 +283,9 @@ include 'inc/navbar.php'; ?>
                   while($row = mysqli_fetch_assoc($getAllOrders)) {
 
                      if ($row['status'] == 'Pending'){
-                        $getmenustatus = mysqli_query($conn, "SELECT count(*) as orderstatus from orderlist where orderlist.orderID = '".$row['order_id']."' and status is not null");
+                        $getmenustatus = mysqli_query($conn, "SELECT count(*) as orderstatus from orderlist where orderlist.orderID = '".$row['order_id']."' and status is null");
                         $row9 = mysqli_fetch_assoc($getmenustatus);
-                        if($row9['orderstatus'] == 0){
+                        if($row9['orderstatus'] > 0){
                           $button = NULL;
                         } else {
                           $button = '<form action="order.php" method="POST"><input class="form-check-input" type="hidden" name="tablenumber" id="tablenumber" value="'.$row['table_number'].'"><input class="form-check-input" type="hidden" name="orderID" id="orderID" value="'.$row['order_id'].'"><button type="submit" class="btn btn-primary" name="completeorder">Complete Order</button></form>';
@@ -311,8 +340,9 @@ include 'inc/navbar.php'; ?>
                                         </div>
                                         </div>
                                         <div class="btn-group btn-group-toggle">
-                                            <button class="btn btn-success" type="submit" name="delivered" id="delivered"> Delivered</button>
-                                            <button class="btn btn-danger" type="submit" name="canceled" id="canceled"> Canceled</button>
+                                            <button class="btn btn-sm btn-success" type="submit" name="delivered" id="delivered"> Delivered</button>
+                                            <button class="btn btn-sm btn-danger" type="submit" name="canceled" id="canceled"> Canceled</button>
+                                             <button class="btn btn-sm btn-info" type="submit" name="returned1"> Returned</button>
                                         </div>';
                         $remarksstatus = '<textarea class="form-control" rows="3" placeholder="Enter remarks" name="remarkCancel"></textarea>';
                       } elseif ($orderliststatus == 'Canceled'){
@@ -329,6 +359,7 @@ include 'inc/navbar.php'; ?>
                         $color = 'success';
                        
                         if ($row['status'] == 'Completed'){
+                           $currentorderquantity = $row1['delivered'];
                           $orderstatus = NULL;
                           $remarksstatus = NULL;
                         } else {
@@ -339,7 +370,7 @@ include 'inc/navbar.php'; ?>
                                       <input class="form-check-input" type="number" name="quantitystatus" id="quantitystatus" value="'.$row1['delivered'].'" min="1" max="'.$row1['delivered'].'">
                                       </div>
                                       </div><div class="form-group clearfix">
-                                        <button class="btn btn-info d-inline" type="submit" name="returned"> Returned</button>
+                                        <button class="btn btn-sm btn-info d-inline" type="submit" name="returned"> Returned</button>
                                       </div>';
                           $remarksstatus = '<textarea class="form-control" rows="3" placeholder="Enter remarks" name="remarkCancel"></textarea>';
                         }
@@ -351,10 +382,10 @@ include 'inc/navbar.php'; ?>
                                     <dd><?php echo ucwords($row1['name']); ?> <?php echo $currentorderquantity; ?> <span class="badge bg-<?php echo $color; ?>"><?php echo $orderliststatus; ?></span> <?php echo $orderstatus;?> <input class="form-check-input" type="hidden" name="orderID" id="orderID" value="<?php echo $row1['orderID'];?>">
                                   <input class="form-check-input" type="hidden" name="menuID" id="menuID" value="<?php echo $row1['menuID'];?>"></dd>
                                   </dl>
-
+                                             <?php echo $remarksstatus;?>
 
                                    </form>
-                                       <?php echo $remarksstatus;?>
+                            
                                      <?php
                                         }
                                         ?>
@@ -450,15 +481,38 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" name="submit" value = "Add Order">
+              <a data-toggle='modal' data-target='#Addorder' href='#Addorder' class="btn btn-primary">Add Order</a>
             </div>
-            </form>
           </div>
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+
+                        <div class="modal fade" id="Addorder">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submit">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
 
   </div><!-- /.content -->
 </div><!-- /.content-wrapper -->

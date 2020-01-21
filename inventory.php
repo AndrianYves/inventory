@@ -3,6 +3,9 @@
 <?php
 
 if(isset($_POST['submit'])){ 
+  mysqli_autocommit($conn, false);
+  $error = false;
+
   $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $timestamp = date("Y-m-d H:i:s");
   $itemname = mysqli_real_escape_string($conn, strtolower($_POST["itemname"]));
@@ -36,7 +39,23 @@ if(isset($_POST['submit'])){
 
   $sql = mysqli_query($conn, "INSERT INTO inventory(itemname, description, quantity, lowquantity, categoryID, unitID, timestamp, adminID) VALUES('$itemname', '$description', '$quantity', '$low', '$catID', '$unitID', '$timestamp', '$adminID')");   
   
-  $_SESSION['success'] = 'Item Added';
+    if ($conn->errno === 1062) {
+      $error = true;
+      $_SESSION['error'][] = 'Inventory already exist.';
+    }
+
+
+        if (!$error) {
+      mysqli_commit($conn);
+        $_SESSION['success'] = 'Item Added';
+    } else {
+      mysqli_rollback($conn);
+    }
+
+
+
+
+
 }
 ?>
 <?php
@@ -106,6 +125,7 @@ include 'inc/navbar.php'; ?>
 
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
+      <?php if ($role == 'Super User'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -127,28 +147,6 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container">
-      <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
 
         <div class="row">
           <div class="col-12">
@@ -159,7 +157,7 @@ include 'inc/navbar.php'; ?>
                   <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Add New Item</button>
                   </div>
                   <div class="col-3">
-                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#quantity">Add or Subtract Quantity</button>
+                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#quantity">Add Quantity</button>
                   </div>
                 </div>
               </div>
@@ -282,40 +280,70 @@ include 'inc/navbar.php'; ?>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table class="table table-bordered table-striped display">
+               <table class="table table-bordered table-striped display">
                   <thead>
                   <tr>
-                    <th width="100">Date</th>
                     <th width="150">Item Name</th>
-                    <th width="30">Quantity</th>
-                    <th width="30">Transaction</th>
-                    <th width="100">By</th>
-                    <th width="100">Remarks</th>
+                    <th width="30">Beginning Quantity</th>
+                    <th width="30">Current Quantity</th>
+                    <th width="100">Action</th>
                   </tr>
                   </thead>
+                  <tbody>
                        <?php
-                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan, ledger.timestamp as ledTime FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id order by ledger.timestamp DESC");
+                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as beginquan, inventory.quantity as currentquan from inventory join ledger on inventory.id = ledger.inventoryID group by inventory.id order by ledger.timestamp");
                   while ($row = mysqli_fetch_array($result3)) {
-                      if ($row['ledQuan'] < 0){  
-                        $color ='red';
-                      } else {
-                        $color ='green';
-                      }
-                      
                         ?>
                   <tr>
-                    <td><?php echo date("F d, Y H:i", strtotime($row['ledTime']));?></td>
                     <td><?php echo ucwords($row['itemname']);?></td>
-                    <td class="text-<?php echo $color;?>"><?php echo $row['ledQuan'];?><?php echo $row['uomname'];?></td>
-                    <td><?php echo ucfirst($row['transaction']);?> <?php echo $row['transactionID'];?></td>
-                    <td><?php echo ucfirst($row['lastname']);?>, <?php echo ucfirst($row['firstname']);?></td>
-                    <td><?php echo ucfirst($row['remarks']);?></td>
-                  </tr>
-                  <?php   } ?>
+                    <td><?php echo $row['beginquan'];?></td>
+                    <td><?php echo $row['currentquan'];?></td>
+                   <td>
+                        <a type="button" class="btn btn-info btn-sm m-0" href='ledger.php?id=<?php echo $row['id']; ?>'>View Transactions</a>
+                      </td>
+                    </tr>
 
+<!--                  <table class="table table-bordered table-striped display">
+                                    <thead>
+                                    <tr>
+                                    <th width="100">Date</th>
+                                    <th width="150">Item Name</th>
+                                    <th width="30">Quantity</th>
+                                    <th width="30">Transaction</th>
+                                    <th width="100">By</th>
+                                    <th width="100">Remarks</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php
+                                    $result5 = mysqli_query($conn, "SELECT *, ledger.quantity as ledQuan, ledger.timestamp as ledTime FROM ledger join inventory on ledger.inventoryID = inventory.id join uom on inventory.unitID = uom.id join admins on ledger.adminID = admins.id where inventory.id = '".$row['id']."' order by ledger.timestamp DESC");
+                                    while ($row1 = mysqli_fetch_array($result5)) {
+                                    if ($row1['ledQuan'] < 0){  
+                                    $color ='red';
+                                    } else {
+                                    $color ='green';
+                                    }
+
+                                    ?>
+                                    <tr>
+                                    <td><?php echo date("F d, Y H:i", strtotime($row1['ledTime']));?></td>
+                                    <td><?php echo ucwords($row1['itemname']);?></td>
+                                    <td class="text-<?php echo $color;?>"><?php echo $row1['ledQuan'];?><?php echo $row1['uomname'];?></td>
+                                    <td><?php echo ucfirst($row1['transaction']);?> <?php echo $row1['transactionID'];?></td>
+                                    <td><?php echo ucfirst($row1['lastname']);?>, <?php echo ucfirst($row1['firstname']);?></td>
+                                    <td><?php echo ucfirst($row1['remarks']);?></td>
+                                    </tr>
+                                    <?php   } ?>
+             </tbody>
+                                    </table>  -->
+
+                  <?php   } ?>
+                </tbody>
                 </table>
-              </div>
-              <!-- /.card-body -->
+
+
+              </div><!-- /.card-body -->
+
             </div><!-- /.card -->
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -381,7 +409,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-4 col-form-label">Set Low Stock Notifications</label>
                     <div class="col-sm-8">
-                      <input  type="number" class="form-control" name="low" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="7" required>
+                      <input  type="number" class="form-control" name="low" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" required>
                     </div>
                   </div>
                 </div>
@@ -390,15 +418,39 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary" name="submit">Add Item</button>
+              <a data-toggle='modal' data-target='#additem' href='#additem' class="btn btn-primary">Add Item</a>
             </div>
-            </form>
+           
           </div>
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+
+                  <div class="modal fade" id="additem">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submit">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
 
       <div class="modal fade" id="quantity">
         <div class="modal-dialog">
@@ -413,7 +465,6 @@ include 'inc/navbar.php'; ?>
                <form class="form-horizontal" action="inventory.php" method="POST">
                 <div class="card-body">
                   <div class="form-group row">
-                    <h5 class="text-danger">Note: Input negative number to subtract quantity.</h5>
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Item Name</label>
                     <div class="col-sm-9">
                       <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
@@ -428,7 +479,7 @@ include 'inc/navbar.php'; ?>
                   <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Quantity</label>
                     <div class="col-sm-9">
-                      <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="7">
+                      <input type="number" class="form-control" step="0.01" placeholder="Quantity" name="quantity" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6">
                     </div>
                   </div>
                    <div class="form-group row">
@@ -442,9 +493,9 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary" name="submitQuantity">Add Quantity</button>
+              <a data-toggle='modal' data-target='#addquantity' href='#addquantity' class="btn btn-primary">Add Quantity</a>
             </div>
-            </form>
+           
           </div>
           <!-- /.modal-content -->
         </div>
@@ -452,10 +503,39 @@ include 'inc/navbar.php'; ?>
       </div>
       <!-- /.modal -->
 
+                  <div class="modal fade" id="addquantity">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submitQuantity">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
+
+
+
     </div><!-- /.content -->
 
 </div><!-- /.content-wrapper -->
-
+  <?php else: ?>
+    <?php include 'forbidden.php'; ?>
+  <?php endif ?>
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

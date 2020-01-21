@@ -9,10 +9,11 @@ if(isset($_POST['submit'])){
     $number = count($_POST["inventoryID"]);
     for($i=0; $i<$number; $i++) {
       $sql = mysqli_query($conn, "INSERT INTO reconciliation(inventoryID, current, remarks, date, timestamp, adminID) VALUES('".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."', '".mysqli_real_escape_string($conn, $_POST["remarks"][$i])."', '$date', '$timestamp', '$adminID')");  
-        mysqli_query($conn, $sql);
+
+       $sql1 = mysqli_query($conn,"UPDATE inventory SET quantity = '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."' WHERE id = '".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."'"); 
     }
     
-    $_SESSION['success'] = 'Item Added';
+    $_SESSION['success'] = 'Reconciliation Successful. Inventory Update.';
 }
 ?>
 <body class="hold-transition sidebar-mini">
@@ -23,6 +24,7 @@ include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+        <?php if ($role == 'Super User'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -44,28 +46,7 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-      <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
+    
         <?php if ($role == 'Super User'): ?>
         <div class="row">
           <div class="col-12">
@@ -95,11 +76,11 @@ include 'inc/navbar.php'; ?>
                     </thead>
                     <tbody>
                     <?php
-                    $result3 = mysqli_query($conn, "SELECT * FROM inventory join uom on inventory.unitID = uom.id");
+                    $result3 = mysqli_query($conn, "SELECT *, inventory.id as invID FROM inventory join uom on inventory.unitID = uom.id");
                     while ($row = mysqli_fetch_array($result3)) {
                           ?>
                     <tr>
-                      <td><input type="hidden" name="inventoryID[]" value="<?php echo $row['id'];?>"><?php echo ucwords($row['itemname']);?></td>
+                      <td><input type="hidden" name="inventoryID[]" value="<?php echo $row['invID'];?>"><?php echo ucwords($row['itemname']);?></td>
                       <td><?php echo $row['quantity'];?> <?php echo $row['uomname'];?></td>
                       <td><input type="number" step="0.01" class="form-control" name="quantity[]"></td>
                       <td><textarea class="form-control" rows="2" placeholder="Enter Remarks..." name="remarks[]"></textarea></td>
@@ -294,7 +275,9 @@ include 'inc/navbar.php'; ?>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  
+    <?php else: ?>
+    <?php include 'forbidden.php'; ?>
+  <?php endif ?>
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

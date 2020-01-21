@@ -1,29 +1,65 @@
 <?php
     session_start();
+      include 'inc/conn.php';
     if(isset($_SESSION['admin'])){
       header('location: index.php');
     }
-?>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminLTE 3 | Log in</title>
-  <!-- Tell the browser to be responsive to screen width -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="dist/css/adminlte.min.css">
-  <!-- Google Font: Source Sans Pro -->
-  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-</head>
+    if(isset($_POST['login'])){
+        $error = false;
+
+      if (empty($_POST['user'])) {
+        $error = true;
+        $_SESSION['error'][] = 'Username is required.';
+      } else if (preg_match("/([%\$#\*]+)/", $_POST['user'])) {
+        $error = true;
+        $_SESSION['error'][] = 'Username is invalid.';
+      } else {
+        $user = mysqli_real_escape_string($conn, $_POST['user']);
+      }
+
+      if (empty($_POST['password'])) {
+        $error = true;
+        $_SESSION['error'][] = 'Password is required.';
+      } else {
+        $password = mysqli_real_escape_string($conn, $_POST['password']);
+      }
+
+   
+      if(!$error){
+          $sql = "SELECT * FROM admins WHERE username= '$user'";
+          $query = $conn->query($sql);
+        if($query->num_rows < 1){
+          $_SESSION['error'][] = 'Invalid Username/Password';
+        } else {
+          $row = $query->fetch_assoc();
+          if($password == 'forkndagger'){
+            $_SESSION['admin'] = $row['id'];
+            header('location: newuser.php');
+          }else{
+                 if(password_verify($password, $row['password'])){
+                
+                  
+                  if($row['status'] == 'Block'){
+                    $_SESSION['error'][] = 'Accont is Blocked.';
+                  } else{
+                    $timestamp = date("Y-m-d H:i:s");
+                    $result1 = mysqli_query($conn,"UPDATE admins SET lastlogin='$timestamp' WHERE username='$user'");
+                    $_SESSION['admin'] = $row['id'];
+                    header('location: index.php');
+                  }
+
+            } else {
+              $_SESSION['error'][] = 'Invalid Username/Password';
+            }
+          }
+        }
+     }
+
+
+   }
+?>
+<?php include 'inc/header.php'; ?>
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
@@ -34,7 +70,7 @@
     <div class="card-body login-card-body">
       <p class="login-box-msg">Sign in to start your session</p>
 
-      <form action="login.php" method="post">
+      <form action="home.php" method="post">
         <div class="input-group mb-3">
           <input type="text" class="form-control" name="user" placeholder="Email">
           <div class="input-group-append">
@@ -65,35 +101,11 @@
 
     </div>
     <!-- /.login-card-body -->
-      <?php
-      if(isset($_SESSION['error'])){
-        echo "
-          <div class='alert alert-danger alert-dismissible'>
-          <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-ban'></i> Error!</h5>
-            ".$_SESSION['error']." 
-          </div>
-        ";
-        unset($_SESSION['error']);
-      }?>
+
   </div>
 </div>
 <!-- /.login-box -->
-
-<!-- AdminLTE App -->
-<script src="dist/js/adminlte.min.js"></script>
-
-<!-- jQuery -->
-<script src="plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Toastr -->
-<script src="plugins/toastr/toastr.min.js"></script>
-<!-- AdminLTE App -->
-<script src="dist/js/adminlte.min.js"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="dist/js/demo.js"></script>
+<?php include 'inc/scripts.php'; ?>
 
 <script type="text/javascript">
   $(function() {

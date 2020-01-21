@@ -37,11 +37,11 @@ if (isset($_POST['submit2'])) {
         
           $_SESSION['success'] = 'Password Changed';
         } else {
-          $_SESSION['error'] = 'New Password not matched.';
+          $_SESSION['error'][] = 'New Password not matched.';
         }
 
       } else {
-        $_SESSION['error'] = 'Invalid current password.';
+        $_SESSION['error'][] = 'Invalid current password.';
       }
 }
 ?>
@@ -50,10 +50,11 @@ if (isset($_POST['submit2'])) {
 <?php
 $current = "settings";
 include 'inc/navbar.php'; ?>
-
+        <?php if ($role == 'Super User'): ?>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
+
     <div class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
@@ -75,28 +76,6 @@ include 'inc/navbar.php'; ?>
     <div class="content">
       <div class="container-fluid">
 
-        <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
          <div class="row">
           <div class="col-4">
 
@@ -338,6 +317,86 @@ include 'inc/navbar.php'; ?>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+
+  <?php else: ?>
+
+
+    <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Settings</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="home.php">Home</a></li>
+              <li class="breadcrumb-item active">Settings</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="container-fluid">
+
+         <div class="row">
+
+            <div class="col-5">
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Change Password</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body" style="height: 300px;">
+                <form role="form" action="settings.php" method="POST">
+                <div class="form-group row">
+                  <label for="currentpassword" class="col-sm-5 col-form-label">Current Password</label>
+                  <div class="col-sm-7">
+                    <input type="password" class="form-control" placeholder="Current Password" name="currentpassword" required>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="newpassword" class="col-sm-5 col-form-label">New Password</label>
+                  <div class="col-sm-7">
+                    <input type="password" class="form-control" placeholder="New Password" name="password" required>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="cpassword" class="col-sm-5 col-form-label">Confirm Password</label>
+                  <div class="col-sm-7">
+                    <input type="password" class="form-control" placeholder="Confirm Password" name="cpassword" required>
+                  </div>
+                </div>
+
+
+
+                <button type="submit" class="btn btn-primary" name="submit2">Change Password</button>
+              </form>
+              </div>
+              <!-- /.card-body -->
+
+            </div>
+            <!-- /.card -->
+
+             </div><!-- /.col -->
+
+
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+
+    </div>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <?php endif ?>
+
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

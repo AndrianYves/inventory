@@ -10,7 +10,7 @@ if (isset($_POST['submit'])) {
   $timestamp = date("Y-m-d H:i:s");
   $error = false;
 
-  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'") or ($_SESSION['error'] = 'Quantity is below zero.' and $error = true);
+  $updateQty = mysqli_query($conn, "UPDATE `inventory` SET `quantity`=`quantity` + '$getItemQty' WHERE `id`='$getItem'") or ($_SESSION['error'][] = 'Quantity is below zero.' and $error = true);
 
   if(!$error){
     $insertReturn = mysqli_query($conn, "INSERT INTO spoilage(inventoryID, quantity, remarks, spoilagedate, timestamp, adminID) VALUES ('$getItem', '$getItemQty', '$getRemarks', '$getSpoilageDate', '$timestamp', '$adminID')") or die(mysqli_error($conn));
@@ -32,6 +32,7 @@ include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+                <?php if ($role == 'Super User'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -53,29 +54,6 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-              <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
-
         <div class="row">
           <div class="col-12">
             <div class="card">
@@ -185,7 +163,10 @@ include 'inc/navbar.php'; ?>
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
-
+  <!-- /.content-wrapper -->
+    <?php else: ?>
+    <?php include 'forbidden.php'; ?>
+  <?php endif ?>
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

@@ -9,6 +9,7 @@ include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+            <?php if ($role == 'Super User'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -46,7 +47,7 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllOrders = mysqli_query($conn, "SELECT * FROM `orders` join ledger on orders.order_id = ledger.transactionID where status = 'Returned' and ledger.transaction = 'Returned' group by orders.order_id");
+                  $getAllOrders = mysqli_query($conn, "SELECT * FROM `orders` join ordersreturn on ordersreturn.orderID = orders.order_id join menu on menu.id = ordersreturn.menuID");
                   while($row = mysqli_fetch_assoc($getAllOrders)) {
                   ?>
                     <tr>
@@ -73,18 +74,12 @@ include 'inc/navbar.php'; ?>
                               <input class="form-check-input" type="hidden" name="updateOrderID" id="updateOrderID" value="<?php echo $row['order_id'];?>" style="visibility: hidden;">
                               <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                               <div class="card-body">
-                                  <dt>Recipe</dt>
-                                  <?php 
-                                     $getAllmenu = mysqli_query($conn, "SELECT * from orderlist join menu on menu.id = orderlist.menuID where orderlist.orderID = '".$row['order_id']."'");
-                                    while($row1 = mysqli_fetch_assoc($getAllmenu)) {
-     
-                                  ?>
+                                  <dt>Menu</dt>
+
                                   <dl>
-                                    <dd><?php echo ucwords($row1['name']); ?> <?php echo $row1['quantity']; ?></dd>
+                                    <dd><?php echo ucwords($row['name']); ?> <?php echo $row['quantity']; ?></dd>
                                   </dl>
-                                     <?php
-                                        }
-                                        ?>
+
                               </div>
 
 
@@ -114,7 +109,9 @@ include 'inc/navbar.php'; ?>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-
+    <?php else: ?>
+    <?php include 'forbidden.php'; ?>
+  <?php endif ?>
 
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>

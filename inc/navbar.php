@@ -20,7 +20,9 @@
         $result3 = mysqli_query($conn, "SELECT count(*) as counted FROM inventory where lowquantity >= quantity or quantity = 0");
          $row1 = mysqli_fetch_assoc($result3);
          $counted = $row1['counted'];
+          if ($counted > '0'){
          echo '<span class="badge badge-danger navbar-badge">'.$counted.'</span>';
+        }
         ?>     
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -177,58 +179,10 @@ switch ($role): ?>
             </a>
           </li>
           <li class="nav-item">
-            <a href="inventory.php" class="nav-link <?php if($current == 'inventory') {echo 'active';} ?>" >
-              <i class="nav-icon fas fa-th"></i>
-              <p>
-                Inventory
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
             <a href="order.php" class="nav-link <?php if($current == 'order') {echo 'active';} ?>">
               <i class="nav-icon fas fa-receipt"></i>
               <p>
                 Orders
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="menu.php" class="nav-link <?php if($current == 'menu') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-scroll"></i>
-              <p>
-                Menu
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="spoilage.php" class="nav-link <?php if($current == 'spoilage') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-fill-drip"></i>
-              <p>
-                Spoilage
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="returnorders.php" class="nav-link <?php if($current == 'return') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-undo"></i>
-              <p>
-                Return Orders
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="cancelorders.php" class="nav-link <?php if($current == 'cancel') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-times"></i>
-              <p>
-                Cancel Orders
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="reconciliation.php" class="nav-link <?php if($current == 'reconciliation') {echo 'active';} ?>">
-              <i class="nav-icon fas fa-chart-bar"></i>
-              <p>
-                Reconciliation
               </p>
             </a>
           </li>

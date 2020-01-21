@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 20, 2020 at 12:29 AM
+-- Generation Time: Jan 21, 2020 at 09:27 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -42,16 +42,20 @@ CREATE TABLE IF NOT EXISTS `admins` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `admins`
 --
 
 INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastname`, `role`, `lastlogin`, `status`) VALUES
-(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2020-01-19 13:53:16.000000', 'Active'),
+(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2020-01-21 11:53:59.000000', 'Active'),
 (2, 'admin', '$2y$10$9pXipDwls1/S7d69Sq7TMu82yCBAh8B5HKCqBXGw3oEl.P2s0qPVC', 'admin@gmail.com', 'adminFirst', 'adminLast', 'Admin', '2020-01-01 01:21:27.000000', 'Block'),
-(5, 'superuser1', '$2y$10$9vTcDONC8FOhqeq8Jo0cRuUYPOXB33jMTYYyDqCirpdGaK.iX9Z1y', '12345@gmail.com', 'awdawd', 'wdwa', 'Super User', NULL, 'Active');
+(5, 'superuser1', '$2y$10$9vTcDONC8FOhqeq8Jo0cRuUYPOXB33jMTYYyDqCirpdGaK.iX9Z1y', '12345@gmail.com', 'awdawd', 'wdwa', 'Super User', NULL, 'Active'),
+(6, 'user', '$2y$10$pjYYkeLyWtV4rArcJ2P4fe7b0h2jpG64ZFBHFgI3DbBj6sVHrDhtW', 'user@gmail.com', 'user', 'user', 'Admin', '2020-01-21 08:05:09.000000', 'Active'),
+(7, 'user1', '$2y$10$XIvMpZtMnpF7RBXvgSXnwevXWBQnt1RiWr8YdJ1Ku4MAHt9V/jwqa', 'user1@gmail.com', 'user1', 'user1', 'Super User', '2020-01-21 09:04:06.000000', 'Active'),
+(8, 'user2', '$2y$10$2dfnwkBLMVLICT5EwRSpyeMZQuwGeE5sRrbfXFTFbmqXCHrySctxW', 'user2@gmail.com', 'user2', 'user2', 'Admin', '2020-01-21 08:52:48.000000', 'Active'),
+(12, 'user3', '$2y$10$DTMb1COK4ZNMjqCQNMnOeesjz.lHpn2oIt85Brewd66iQc0ZH0EQu', 'user3@gmail.com', 'user3', 'user3', 'Admin', NULL, 'Active');
 
 -- --------------------------------------------------------
 
@@ -84,7 +88,8 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `unitID` int(255) DEFAULT NULL,
   `timestamp` timestamp(6) NOT NULL,
   `adminID` int(255) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `itemname` (`itemname`,`description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -135,6 +140,19 @@ CREATE TABLE IF NOT EXISTS `menuitems` (
   `quantity` decimal(65,2) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `menuitems`
+--
+
+INSERT INTO `menuitems` (`menuID`, `inventoryID`, `quantity`) VALUES
+(1, 1, '250.00'),
+(1, 3, '250.00'),
+(2, 1, '250.00'),
+(2, 2, '250.00'),
+(3, 1, '2.00'),
+(3, 2, '2.00'),
+(3, 3, '2.00');
+
 -- --------------------------------------------------------
 
 --
@@ -149,8 +167,7 @@ CREATE TABLE IF NOT EXISTS `orderlist` (
   `total` int(11) DEFAULT NULL,
   `delivered` int(11) DEFAULT '0',
   `canceled_returned_order` int(11) DEFAULT '0',
-  `status` enum('Delivered','Canceled','Returned','Pending') DEFAULT NULL,
-  `remarks` text
+  `status` enum('Delivered','Canceled','Returned','Pending') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -173,6 +190,21 @@ CREATE TABLE IF NOT EXISTS `orders` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `orderscancel`
+--
+
+DROP TABLE IF EXISTS `orderscancel`;
+CREATE TABLE IF NOT EXISTS `orderscancel` (
+  `orderID` int(11) NOT NULL,
+  `menuID` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `remarks` text NOT NULL,
+  `timestamp` timestamp(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ordersitems`
 --
 
@@ -182,6 +214,53 @@ CREATE TABLE IF NOT EXISTS `ordersitems` (
   `inventoryID` bigint(255) NOT NULL,
   `quantity` decimal(65,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `ordersitems`
+--
+
+INSERT INTO `ordersitems` (`orderID`, `inventoryID`, `quantity`) VALUES
+(1, 1, '1250.00'),
+(1, 3, '1250.00'),
+(1, 1, '750.00'),
+(1, 2, '750.00'),
+(2, 1, '250.00'),
+(2, 2, '250.00'),
+(3, 1, '250.00'),
+(3, 3, '250.00'),
+(3, 1, '250.00'),
+(3, 2, '250.00'),
+(4, 1, '250.00'),
+(4, 3, '250.00'),
+(5, 1, '250.00'),
+(5, 3, '250.00'),
+(6, 1, '250.00'),
+(6, 3, '250.00'),
+(7, 1, '250.00'),
+(7, 3, '250.00'),
+(8, 1, '250.00'),
+(8, 3, '250.00'),
+(9, 1, '250.00'),
+(9, 2, '250.00'),
+(10, 1, '250.00'),
+(10, 3, '250.00'),
+(11, 1, '250.00'),
+(11, 3, '250.00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ordersreturn`
+--
+
+DROP TABLE IF EXISTS `ordersreturn`;
+CREATE TABLE IF NOT EXISTS `ordersreturn` (
+  `orderID` int(11) NOT NULL,
+  `menuID` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `remarks` text NOT NULL,
+  `timestamp` timestamp(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -231,21 +310,21 @@ CREATE TABLE IF NOT EXISTS `tables` (
   `tablenumber` int(11) NOT NULL,
   `status` enum('Vacant','Occupied') NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `tables`
 --
 
 INSERT INTO `tables` (`id`, `tablenumber`, `status`) VALUES
-(1, 1, 'Vacant'),
-(2, 2, 'Vacant'),
-(3, 3, 'Vacant'),
-(4, 4, 'Vacant'),
-(5, 5, 'Vacant'),
-(6, 6, 'Vacant'),
-(7, 7, 'Vacant'),
-(8, 8, 'Vacant'),
+(1, 1, 'Occupied'),
+(2, 2, 'Occupied'),
+(3, 3, 'Occupied'),
+(4, 4, 'Occupied'),
+(5, 5, 'Occupied'),
+(6, 6, 'Occupied'),
+(7, 7, 'Occupied'),
+(8, 8, 'Occupied'),
 (9, 9, 'Vacant'),
 (10, 10, 'Vacant'),
 (11, 11, 'Vacant'),
@@ -255,7 +334,10 @@ INSERT INTO `tables` (`id`, `tablenumber`, `status`) VALUES
 (15, 15, 'Vacant'),
 (16, 16, 'Vacant'),
 (17, 17, 'Vacant'),
-(18, 18, 'Vacant');
+(18, 18, 'Vacant'),
+(19, 19, 'Vacant'),
+(20, 20, 'Vacant'),
+(21, 21, 'Vacant');
 
 -- --------------------------------------------------------
 

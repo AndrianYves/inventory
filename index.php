@@ -30,6 +30,7 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
+
         <div class="row">
           <div class="col-lg-3 col-6">
             <!-- small box -->
@@ -62,7 +63,7 @@ include 'inc/navbar.php'; ?>
                 echo "<h3>".mysqli_num_rows($query)."</h3>";
                 ?>
 
-                <p>Menu</p>
+                <p>Total Menu</p>
               </div>
               <div class="icon">
                 <i class="nav-icon fas fa-scroll"></i>
@@ -82,12 +83,12 @@ include 'inc/navbar.php'; ?>
                 echo "<h3>".mysqli_num_rows($query)."</h3>";
                 ?>
 
-                <p>New Orders</p>
+                <p>Total Orders</p>
               </div>
               <div class="icon">
                 <i class="nav-icon fas fa-receipt"></i>
               </div>
-              <a href="orders.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="order.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
 
@@ -113,6 +114,61 @@ include 'inc/navbar.php'; ?>
 
         </div>
         <!-- /.row -->
+
+<div class="row">
+          <div class="col-lg-7 col-6">
+<div class="card">
+              <div class="card-header border-transparent">
+                <h3 class="card-title">Top 10 selling Menu</h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-tool" data-card-widget="remove">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table m-0">
+                    <thead>
+                    <tr>
+                      <th>Menu Name</th>
+                      <th>Description</th>
+                      <th>Total Orders</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                <?php
+                 
+                    $sales = mysqli_query($conn, "SELECT *, count(orderlist.menuID) as sales FROM orderlist join menu on menu.id = orderlist.menuID group by menu.id limit 10");
+                     while($row1 = mysqli_fetch_assoc($sales)) {
+                  ?>
+
+                    <tr>
+                      <td><?php echo $row1['name']; ?></td>
+                      <td><?php echo $row1['description']; ?></td>
+                      <td><?php echo $row1['sales']; ?></td>
+                    </tr>
+                  <?php }?>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.table-responsive -->
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+
+
+
+        </div>
+        <!-- /.row -->
+
+
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->

@@ -58,6 +58,7 @@ include 'inc/navbar.php'; ?>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
+            <?php if ($role == 'Super User'): ?>
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -80,28 +81,6 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container">
-      <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
 
         <div class="row">
           <div class="col-12">
@@ -341,9 +320,9 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary" name="submit">Add Menu</button>
+              <a data-toggle='modal' data-target='#addmenu' href='#addmenu' class="btn btn-primary">Add Menu</a>
             </div>
-            </form>
+           
           </div>
           <!-- /.modal-content -->
         </div>
@@ -351,12 +330,40 @@ include 'inc/navbar.php'; ?>
       </div>
       <!-- /.modal -->
 
+                  <div class="modal fade" id="addmenu">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submit">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
+
     </div><!-- /.content -->
 
 
 
 </div>
   <!-- /.content-wrapper -->
+    <?php else: ?>
+    <?php include 'forbidden.php'; ?>
+  <?php endif ?>
   <!-- Main Footer -->
   <?php include 'inc/footer.php'; ?>
 

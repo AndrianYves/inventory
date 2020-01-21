@@ -2,21 +2,28 @@
 <?php include 'inc/header.php'; ?>
 <?php
 if(isset($_POST['submit'])){ 
+  mysqli_autocommit($conn, false);
+  $error = false;
   $username = mysqli_real_escape_string($conn, $_POST["username"]);
   $firstname = mysqli_real_escape_string($conn, strtolower($_POST["firstname"]));
   $lastname = mysqli_real_escape_string($conn, strtolower($_POST["lastname"]));
-  $password = mysqli_real_escape_string($conn, $_POST["password"]);
-  $cpassword = mysqli_real_escape_string($conn, $_POST["cpassword"]);
+  $password = 'forkndagger';
   $email = mysqli_real_escape_string($conn, $_POST["email"]);
   $userrole = mysqli_real_escape_string($conn, $_POST["role"]);
 
-  if ($password == $cpassword) {
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $sql = mysqli_query($conn, "INSERT INTO admins(username, password, email, firstname, lastname, role) VALUES('$username', '$hashedPassword', '$email', '$firstname', '$lastname', '$userrole')");   
+  //  $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $sql = mysqli_query($conn, "INSERT INTO admins(username, password, email, firstname, lastname, role) VALUES('$username', '$password', '$email', '$firstname', '$lastname', '$userrole')");
   
-    $_SESSION['success'] = 'User Created';
+    if ($conn->errno === 1062) {
+      $error = true;
+      $_SESSION['error'][] = 'Username/Email is already taken.';
+    }
+
+  if (!$error) {
+    mysqli_commit($conn);
+  $_SESSION['success'] = 'User Created. Default password is forkndagger.';
   } else {
-    $_SESSION['error'] = 'Password not matched.';
+    mysqli_rollback($conn);
   }
 
 }
@@ -66,28 +73,6 @@ include 'inc/navbar.php'; ?>
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-        <?php
-        if(isset($_SESSION['error'])){
-          echo "
-            <div class='alert alert-danger alert-dismissible'>
-            <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                    <h5><i class='icon fas fa-ban'></i> Error!</h5>
-              ".$_SESSION['error']." 
-            </div>
-          ";
-          unset($_SESSION['error']);
-        }
-        if(isset($_SESSION['success'])){
-          echo "
-            <div class='alert alert-success alert-dismissible'>
-                  <button type='button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>
-                  <h5><i class='icon fas fa-check'></i> Success!</h5>
-              ".$_SESSION['success']." 
-            </div>
-          ";
-          unset($_SESSION['success']);
-        }
-      ?>
          <div class="row">
           <div class="col-12">
             <div class="card">
@@ -185,25 +170,11 @@ include 'inc/navbar.php'; ?>
                     </div>
                   </div>
                   <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Password</label>
-                    <div class="col-sm-9">
-                      <input type="password" class="form-control" placeholder="Password" name="password" required>
-                    </div>
-                  </div>
-                  <div class="form-group row">
-                    <label for="inputEmail3" class="col-sm-3 col-form-label">Confirm Password</label>
-                    <div class="col-sm-9">
-                      <input type="password" class="form-control" placeholder="Confirm Password" name="cpassword" required>
-                    </div>
-                  </div>
-                  <div class="form-group row">
                     <label for="inputEmail3" class="col-sm-3 col-form-label">Role</label>
                     <div class="col-sm-9">
                       <select id="two" class="form-control" name="role">
-                        <?php $ads = mysqli_query($conn, "SELECT * from admins");?>
-                        <?php foreach($ads as $adrole): ?>
-                          <option value="<?= $adrole['id']; ?>"><?= $adrole['role']; ?></option>
-                        <?php endforeach; ?>
+                         <option value="Super User">Super User</option>
+                         <option value="Admin">Admin</option>
                       </select>
                     </div>
                   </div>
@@ -213,15 +184,39 @@ include 'inc/navbar.php'; ?>
             </div>
             <div class="modal-footer justify-content-between">
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary" name="submit">Create User</button>
+              <a data-toggle='modal' data-target='#createuser' href='#createuser' class="btn btn-primary">Create User</a>
             </div>
-            </form>
+           
           </div>
           <!-- /.modal-content -->
         </div>
         <!-- /.modal-dialog -->
       </div>
       <!-- /.modal -->
+
+                  <div class="modal fade" id="createuser">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="submit">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
 
     </div>
     <!-- /.content -->
