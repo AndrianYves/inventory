@@ -45,7 +45,6 @@
             <i class="nav-icon fas fa-th mr-2"></i> <?php echo $row['quantity'];?> <?php echo ucwords($row['itemname']);?>
             <span class="float-right badge bg-<?php echo $status; ?>"><?php echo $statustext; ?></span>
           </a>
-          <a href="outofstockprint.php" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
         <?php } ?>
 
 
@@ -143,6 +142,14 @@ switch ($role): ?>
               <i class="nav-icon fas fa-chart-bar"></i>
               <p>
                 Reconciliation
+              </p>
+            </a>
+          </li>
+           <li class="nav-item">
+            <a href="reports.php" class="nav-link <?php if($current == 'reports') {echo 'active';} ?>">
+              <i class="nav-icon fas fa-paste"></i>
+              <p>
+                Reports
               </p>
             </a>
           </li>
