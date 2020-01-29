@@ -263,6 +263,9 @@ include 'inc/navbar.php'; ?>
                   <div class="col-3">
                   <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Add New Order</button>
                   </div>
+                   <div class="col-3 float-right">
+                    <a href="orderhistory.php" class="btn btn-block btn-info">View Order History</a>
+                  </div>
                 </div>
               </div>
               <!-- /.card-header -->

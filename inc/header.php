@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="plugins/select2/css/select2.min.css">
   <link rel="stylesheet" href="plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
   <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-    <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
+  <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 </head>
 <style type="text/css">
   p, h1, h2, h3, h4, h5, h6, label, td, dt, dd{
