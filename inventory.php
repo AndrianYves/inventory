@@ -247,6 +247,12 @@ include 'inc/navbar.php'; ?>
                                   <input type="text" class="form-control" id="editcat<?php echo $row['invID']; ?>" name="editnewCat" value="<?php echo $row['categoryname']; ?>">
                                 </div>
                               </div>
+                              <div class="form-group row">
+                                <label for="inputEmail3" class="col-sm-4 col-form-label">Set Low Stock Notifications</label>
+                                <div class="col-sm-8">
+                                  <input  type="number" class="form-control" value="<?php echo $row['lowquantity']; ?>" disabled>
+                                </div>
+                              </div>
 
                           
                         </div>
