@@ -2,7 +2,7 @@
 <?php include 'inc/header.php'; ?>
 <?php
 
-if (isset($_POST['submit'])) {
+if (isset($_POST['createorder'])) {
   mysqli_autocommit($conn, false);
   $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $result1 = mysqli_query($conn, "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
@@ -21,7 +21,7 @@ if (isset($_POST['submit'])) {
         $_SESSION['error'][] = 'Invalid.';
       }
 
-    $result1 = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan, inventory.id as invID FROM inventory join menuitems on inventory.id = menuitems.inventoryID join menu on menuitems.menuID = menu.id where menu.id = '".$_POST['menuName'][$i]."'");
+    $result1 = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan, inventory.id as invID FROM inventory join menuitems on inventory.id = menuitems.inventoryID join menu on menuitems.menuID = menu.id where menu.id = '".array_filter($_POST['menuName'])[$i]."'");
 
     while ($row = MySQLi_fetch_array($result1)) { 
       $inventoryQTY = $row['menuQuan'];
@@ -32,7 +32,7 @@ if (isset($_POST['submit'])) {
 
       $sql2 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity - '$newQuantity' WHERE id='$inventoryID'");
 
-      $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, inventoryID, quantity) VALUES('$orderNumber', '$inventoryID', '$newQuantity')");  
+      $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, menuID, inventoryID, quantity) VALUES('$orderNumber', '".array_filter($_POST['menuName'])[$i]."', '$inventoryID', '$newQuantity')");  
 
       $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, adminID) VALUES('$inventoryID', '$getItemQty', 'Order', '$orderNumber', '$getTimestamp', '$adminID')");
       if (!$sql2) {
@@ -104,13 +104,13 @@ if (isset($_POST['submit'])) {
     $sql3 = mysqli_query($conn, "INSERT INTO orderscancel(orderID, menuID, quantity, remarks, timestamp) VALUES('$orderID', '$menuID', '$quantitystatus', '$remarks', '$getTimestamp')") or die(mysqli_error($conn));
 
     
-    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID'");
+    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderID = '$orderID' and menuID = '$menuID'");
     $row = mysqli_fetch_assoc($sql2);
-     if($row['total'] == 0 && $row['delivered'] == 0){
+     if($row['total'] == 0){
        $sql = mysqli_query($conn,"UPDATE orderlist SET status = 'Canceled' WHERE orderID = '$orderID' and menuID = '$menuID' ");
      }
    
-  $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID'");
+  $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID' and menuID = '$menuID'");
   $remarkCancel = 'Canceled';
   while ($execQuantity = mysqli_fetch_array($queryQuantity)) {
     $getInvId = $execQuantity['inventoryID'];
@@ -152,13 +152,13 @@ if (isset($_POST['submit'])) {
 
     $sql3 = mysqli_query($conn, "INSERT INTO ordersreturn(orderID, menuID, quantity, remarks, timestamp) VALUES('$orderID', '$menuID', '$quantitystatus', '$remarks', '$getTimestamp')");
 
-    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID'");
+    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderID = '$orderID' and menuID = '$menuID'");
     $row = mysqli_fetch_assoc($sql2);
     if($row['delivered'] == 0){
        $sql = mysqli_query($conn,"UPDATE orderlist SET status = 'Returned' WHERE orderID = '$orderID' and menuID = '$menuID' ");
      }
 
-    $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID'");
+    $queryQuantity = mysqli_query($conn, "SELECT * FROM ordersitems WHERE orderID = '$orderID' and menuID = '$menuID'");
     $remarkCancel = 'Returned';  
     while ($execQuantity = mysqli_fetch_assoc($queryQuantity)) {
       $getInvId = $execQuantity['inventoryID'];
@@ -507,7 +507,7 @@ include 'inc/navbar.php'; ?>
                         </div>
                         <div class="modal-footer justify-content-between">
                           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                          <button type="submit" class="btn btn-primary" name="submit">Confirm</button>
+                          <button type="submit" class="btn btn-primary" name="createorder">Confirm</button>
                            </form>
                         </div>
                       </div>

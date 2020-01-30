@@ -81,7 +81,7 @@ include 'inc/navbar.php'; ?>
                   while($row = mysqli_fetch_assoc($getAllSpoilage)) {
                   ?>
                     <tr>
-                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['spoilagedate']));  ?></td>
+                      <td><?php echo date('F-j-Y',strtotime($row['spoilagedate']));  ?></td>
                       <td><?php echo ucwords($row['itemname']); ?></td>
                       <td><?php echo (-1 * $row['spoqty']); ?></td>
                       <td><?php echo ucfirst($row['remarks']); ?></td>

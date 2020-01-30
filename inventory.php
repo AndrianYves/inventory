@@ -297,7 +297,7 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                        <?php
-                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as beginquan, inventory.quantity as currentquan from inventory join ledger on inventory.id = ledger.inventoryID group by inventory.id order by ledger.timestamp");
+                  $result3 = mysqli_query($conn, "SELECT *, ledger.quantity as beginquan, inventory.quantity as currentquan, Inventory.id as inventID from inventory join ledger on inventory.id = ledger.inventoryID group by inventory.id order by ledger.timestamp");
                   while ($row = mysqli_fetch_array($result3)) {
                         ?>
                   <tr>
@@ -305,7 +305,7 @@ include 'inc/navbar.php'; ?>
                     <td><?php echo $row['beginquan'];?></td>
                     <td><?php echo $row['currentquan'];?></td>
                    <td>
-                        <a type="button" class="btn btn-info btn-sm m-0" href='ledger.php?id=<?php echo $row['id']; ?>'>View Transactions</a>
+                        <a type="button" class="btn btn-info btn-sm m-0" href='ledger.php?id=<?php echo $row['inventID']; ?>'>View Transactions</a>
                       </td>
                     </tr>
 
