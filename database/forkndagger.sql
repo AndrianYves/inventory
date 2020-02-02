@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jan 30, 2020 at 03:04 PM
+-- Generation Time: Feb 02, 2020 at 06:57 PM
 -- Server version: 5.7.26
 -- PHP Version: 7.2.18
 
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `admins` (
 --
 
 INSERT INTO `admins` (`id`, `username`, `password`, `email`, `firstname`, `lastname`, `role`, `lastlogin`, `status`) VALUES
-(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2020-01-30 06:11:10.000000', 'Active'),
+(1, 'superadmin', '$2y$10$SB5nbD.QlZ/Yl0JvWHH.sOKMMTTDCBhQr4DKBGO8vEpGCKYWa0TCK', 'superadmin@gmail.com', 'superadminFirst', 'superadminLast', 'Super User', '2020-02-02 08:17:23.000000', 'Active'),
 (2, 'admin', '$2y$10$9pXipDwls1/S7d69Sq7TMu82yCBAh8B5HKCqBXGw3oEl.P2s0qPVC', 'admin@gmail.com', 'adminFirst', 'adminLast', 'Admin', '2020-01-01 01:21:27.000000', 'Block'),
 (5, 'superuser1', '$2y$10$9vTcDONC8FOhqeq8Jo0cRuUYPOXB33jMTYYyDqCirpdGaK.iX9Z1y', '12345@gmail.com', 'awdawd', 'wdwa', 'Super User', NULL, 'Active'),
 (6, 'user', '$2y$10$pjYYkeLyWtV4rArcJ2P4fe7b0h2jpG64ZFBHFgI3DbBj6sVHrDhtW', 'user@gmail.com', 'user', 'user', 'Admin', '2020-01-21 13:32:51.000000', 'Active'),
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS `category` (
 --
 
 INSERT INTO `category` (`id`, `categoryname`) VALUES
-(1, 'meat'),
-(2, 'fruits');
+(1, 'fruits'),
+(2, 'drinks');
 
 -- --------------------------------------------------------
 
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `ledger` (
   `id` bigint(255) NOT NULL AUTO_INCREMENT,
   `inventoryID` int(255) NOT NULL,
   `quantity` decimal(65,2) NOT NULL,
-  `transaction` enum('Inventory','Order','Canceled','Returned','Spoilage') NOT NULL,
+  `transaction` enum('Inventory','Order','Canceled','Returned','Spoilage','Reconciliation') NOT NULL,
   `transactionID` bigint(255) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   `timestamp` timestamp(6) NOT NULL,
@@ -133,15 +133,7 @@ CREATE TABLE IF NOT EXISTS `menu` (
   `timestamp` timestamp(6) NOT NULL,
   `adminID` int(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `menu`
---
-
-INSERT INTO `menu` (`id`, `name`, `description`, `timestamp`, `adminID`) VALUES
-(1, 'apple juice', 'apple juice', '2020-01-30 14:42:02.000000', 1),
-(2, 'orange juice', 'orange juice', '2020-01-30 14:42:12.000000', 1);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -153,16 +145,10 @@ DROP TABLE IF EXISTS `menuitems`;
 CREATE TABLE IF NOT EXISTS `menuitems` (
   `menuID` int(255) NOT NULL,
   `inventoryID` int(255) NOT NULL,
-  `quantity` decimal(65,2) UNSIGNED NOT NULL
+  `quantity` decimal(65,2) UNSIGNED NOT NULL,
+  `timestamp` timestamp(6) NOT NULL,
+  `adminID` int(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `menuitems`
---
-
-INSERT INTO `menuitems` (`menuID`, `inventoryID`, `quantity`) VALUES
-(1, 1, '5.00'),
-(2, 2, '5.00');
 
 -- --------------------------------------------------------
 
@@ -299,22 +285,22 @@ CREATE TABLE IF NOT EXISTS `tables` (
 --
 
 INSERT INTO `tables` (`id`, `tablenumber`, `status`) VALUES
-(1, 1, 'Occupied'),
-(2, 2, 'Occupied'),
-(3, 3, 'Occupied'),
-(4, 4, 'Occupied'),
-(5, 5, 'Occupied'),
-(6, 6, 'Occupied'),
-(7, 7, 'Occupied'),
-(8, 8, 'Occupied'),
-(9, 9, 'Occupied'),
-(10, 10, 'Occupied'),
-(11, 11, 'Occupied'),
-(12, 12, 'Occupied'),
-(13, 13, 'Occupied'),
-(14, 14, 'Occupied'),
-(15, 15, 'Occupied'),
-(16, 16, 'Occupied'),
+(1, 1, 'Vacant'),
+(2, 2, 'Vacant'),
+(3, 3, 'Vacant'),
+(4, 4, 'Vacant'),
+(5, 5, 'Vacant'),
+(6, 6, 'Vacant'),
+(7, 7, 'Vacant'),
+(8, 8, 'Vacant'),
+(9, 9, 'Vacant'),
+(10, 10, 'Vacant'),
+(11, 11, 'Vacant'),
+(12, 12, 'Vacant'),
+(13, 13, 'Vacant'),
+(14, 14, 'Vacant'),
+(15, 15, 'Vacant'),
+(16, 16, 'Vacant'),
 (17, 17, 'Vacant'),
 (18, 18, 'Vacant'),
 (19, 19, 'Vacant'),
@@ -340,8 +326,8 @@ CREATE TABLE IF NOT EXISTS `uom` (
 --
 
 INSERT INTO `uom` (`id`, `uomname`) VALUES
-(2, 'g'),
-(1, 'kg');
+(2, 'ml'),
+(1, 'pc');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

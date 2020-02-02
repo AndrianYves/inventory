@@ -18,7 +18,7 @@ if(isset($_POST['submit'])){
     for($i=0; $i<$number; $i++) {
       if(trim($_POST["itemname"][$i] != '')) {
 
-        $sql = "INSERT INTO menuitems(menuID, inventoryID, quantity) VALUES('$menuID', '".mysqli_real_escape_string($conn, $_POST["itemname"][$i])."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."')";
+        $sql = "INSERT INTO menuitems(menuID, inventoryID, quantity, timestamp, adminID) VALUES('$menuID', '".mysqli_real_escape_string($conn, $_POST["itemname"][$i])."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."', '$timestamp', '$adminID')";
         mysqli_query($conn, $sql);
       }
     }
@@ -29,9 +29,22 @@ if(isset($_POST['submit'])){
 ?>
 <?php
 if (isset($_POST['editmenu'])) {
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
   $editmenuname = $_POST['editmenuname'];
   $editmenudesription = $_POST['editmenudesription'];
   $editmenuid = $_POST['editmenuid'];
+  $timestamp = date("Y-m-d H:i:s");
+
+  $number = count($_POST["recipequantity"]);
+  for ($i=0; $i < $number; $i++) {
+    if(trim($_POST["recipequantity"][$i] != '')) {
+
+      $sql = "REPLACE INTO menuitems VALUES('$editmenuid', '".mysqli_real_escape_string($conn, $_POST["recipename"][$i])."', '".mysqli_real_escape_string($conn, $_POST["recipequantity"][$i])."', '$timestamp', '$adminID')";
+
+    // $sql = "INSERT INTO menuitems(menuID, inventoryID, quantity, timestamp, adminID) VALUES('$editmenuid', '".mysqli_real_escape_string($conn, $_POST["recipename"][$i])."', '".mysqli_real_escape_string($conn, $_POST["recipequantity"][$i])."', '$timestamp', '$adminID')";
+    }
+  }
+
 
   $result1 = mysqli_query($conn,"UPDATE menu SET name='$editmenuname', description='$editmenudesription' WHERE id='$editmenuid'");
 
@@ -132,6 +145,7 @@ include 'inc/navbar.php'; ?>
                            <div class="card-body">
                               <div class="form-group">
                                 <form role="form" action="menu.php" method="POST">
+                                  <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
                                 <label for="exampleInputEmail1">Menu Name</label>
                                 <input type="text" name="editmenuname" class="form-control" value="<?php echo $row['name']; ?>">
                                 <input type="hidden" name="editmenuid" class="form-control" value="<?php echo $row['id']; ?>">
@@ -141,17 +155,33 @@ include 'inc/navbar.php'; ?>
                                 <input type="text" name="editmenudesription" class="form-control" value="<?php echo $row['description']; ?>">
                               </div>
                               <label for="inputEmail3" class="col-sm-4 col-form-label">Recipe</label>
-                              <?php $cat = mysqli_query($conn, "SELECT * FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
-                              <?php foreach($cat as $category): ?>
-                              <div class="row">
-                                <div class="col-sm-4">
-                                  <p><?= ucfirst($category['itemname']); ?></p>
-                                </div>
-                                <div class="col-sm-4">
-                                  <p><?= ucfirst($category['quantity']); ?> <?= ucfirst($category['uomname']); ?></p>
+                              <?php $cat = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join menuitems on inventory.id = menuitems.inventoryID join uom on inventory.unitID = uom.id where menuID = '".$row['id']."'");?>
+                              
+                              <?php $recipes = mysqli_query($conn, "SELECT *, inventory.id as 'invID' FROM inventory join uom on inventory.unitID = uom.id");?>
+
+                              <div id="dynamic_edit">
+                                <div class="row">
+                                  <div class="col-sm-4">
+                                    <?php foreach($cat as $category): ?>
+                                    <select class="form-control" name="recipename[]" id="recipename_1">
+                                      <option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option>
+                                      <?php foreach($recipes as $addrecipes): ?>
+                                        <option value="<?= $addrecipes['invID']; ?>"><?= ucfirst($addrecipes['itemname']); ?>, <?= ucfirst($addrecipes['uomname']); ?></option>
+                                      <?php endforeach; ?>
+                                       </select>
+                                     <?php endforeach; ?>
+                                  </div>
+                                  <div class="col-sm-4">
+                                    <?php foreach($cat as $catquan): ?>
+                                    <input type="text" name="recipequantity[]" id="recipequantity_1" class="form-control" value="<?= ucfirst($catquan['quantity']); ?>">
+                                    <?php endforeach; ?>
+                                   </div>
+                                  <div class="col-sm-4">
+                                    <button type="button" name="addupdate" id="addupdate" class="btn btn-success btn-xs">Add Recipe</button>
+                                  </div>
                                 </div>
                               </div>
-                                <?php endforeach; ?>
+                                
 
                             </div>
                             <!-- /.card-body -->
@@ -376,6 +406,23 @@ $(document).ready(function(){
   $('#add').click(function(){
     i++;
     $('#dynamic_field').append('<tr id="row'+i+'"><td><select class="form-control" name="itemname[]" id="itemname_'+i+'"><?php foreach($cat as $category): ?><option value="<?= $category['invID']; ?>"><?= ucfirst($category['itemname']); ?>, <?= ucfirst($category['uomname']); ?></option><?php endforeach; ?></select></td><td><input type="number" class="form-control" step=".01" name="quantity[]" id="quantity_'+i+'"></td><td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td></tr>');
+  });
+  
+
+  $(document).on('click', '.btn_remove', function(){
+    var button_id = $(this).attr("id"); 
+    $('#row'+button_id+'').remove();
+  });
+  
+});
+
+</script>
+<script>
+$(document).ready(function(){
+  var i=1;
+  $('#addupdate').click(function(){
+    i++;
+    $('#dynamic_edit').append('<div id="row'+i+'"><div class="row"><div class="col-sm-4"><select class="form-control" name="recipename[]" id="recipename_'+i+'""><?php foreach($recipes as $addrecipes): ?><option value="<?= $addrecipes['invID']; ?>"><?= ucfirst($addrecipes['itemname']); ?>, <?= ucfirst($addrecipes['uomname']); ?></option><?php endforeach; ?></select></div><div class="col-sm-4"><input type="text" name="recipequantity[]" id="recipequantity_'+i+'" class="form-control"></div><div class="col-sm-4"><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></div></div></div>');
   });
   
 

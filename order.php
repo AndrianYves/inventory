@@ -49,6 +49,67 @@ if (isset($_POST['createorder'])) {
 
   $sql3 = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `table_number`, `timestamp`, `status`, `adminID`) VALUES ('$orderNumber', '$tablenumber', '$getTimestamp', 'Pending', '$adminID')");
 
+
+
+  $sql5 = mysqli_query($conn,"UPDATE tables SET status = 'Occupied' WHERE tablenumber = '$tablenumber'");
+
+    
+    if (!$error) {
+      mysqli_commit($conn);
+      $_SESSION['success'] = 'Order '.$orderNumber.' Created';
+    } else {
+      mysqli_rollback($conn);
+    }
+
+}
+
+if (isset($_POST['additionalorder'])) {
+  mysqli_autocommit($conn, false);
+  $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
+  $result1 = mysqli_query($conn, "SELECT order_id FROM orders ORDER BY order_id DESC LIMIT 1");
+  $query = mysqli_fetch_assoc($result1);
+  $orderNumber = $query['order_id'] + 1;
+  $error = false;
+  $tablenumber = mysqli_real_escape_string($conn, $_POST["tablenumber"]);
+
+  $getTimestamp = date("Y-m-d H:i");
+  // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
+
+  $number = count($_POST["addmenuName"]);
+  for ($i=0; $i < $number; $i++) {
+    if (mysqli_real_escape_string($conn, $_POST['addqtyMenu'][$i]) < 1){
+        $error = true;
+        $_SESSION['error'][] = 'Invalid.';
+      }
+
+    $result1 = mysqli_query($conn, "SELECT *, menuitems.quantity as menuQuan, inventory.id as invID FROM inventory join menuitems on inventory.id = menuitems.inventoryID join menu on menuitems.menuID = menu.id where menu.id = '".array_filter($_POST['addmenuName'])[$i]."'");
+
+    while ($row = MySQLi_fetch_array($result1)) { 
+      $inventoryQTY = $row['menuQuan'];
+      $inventoryID = $row['invID'];
+
+      $newQuantity = ($inventoryQTY * mysqli_real_escape_string($conn, $_POST['addqtyMenu'][$i]));
+      $getItemQty = (-1 * $newQuantity);
+
+      $sql2 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity - '$newQuantity' WHERE id='$inventoryID'");
+
+      $sql1 = mysqli_query($conn, "INSERT INTO ordersitems(orderID, menuID, inventoryID, quantity) VALUES('$orderNumber', '".array_filter($_POST['addmenuName'])[$i]."', '$inventoryID', '$newQuantity')");  
+
+      $sql = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, transactionID, timestamp, adminID) VALUES('$inventoryID', '$getItemQty', 'Order', '$orderNumber', '$getTimestamp', '$adminID')");
+      if (!$sql2) {
+       $error = true;
+       $_SESSION['error'][] = 'Not enough Recipe.';
+      }
+
+     }
+
+    $sql4 = mysqli_query($conn, "INSERT INTO orderlist(orderID, menuID, quantity, total) VALUES('$orderNumber', '".mysqli_real_escape_string($conn, $_POST["addmenuName"][$i])."', '".mysqli_real_escape_string($conn, $_POST["addqtyMenu"][$i])."', '".mysqli_real_escape_string($conn, $_POST["addqtyMenu"][$i])."')"); 
+
+
+  }
+
+  $sql3 = mysqli_query($conn,"INSERT INTO `orders`(`order_id`, `table_number`, `timestamp`, `status`, `adminID`) VALUES ('$orderNumber', '$tablenumber', '$getTimestamp', 'Pending', '$adminID')");
+
   $sql5 = mysqli_query($conn,"UPDATE tables SET status = 'Occupied' WHERE tablenumber = '$tablenumber'");
 
     
@@ -154,7 +215,7 @@ if (isset($_POST['createorder'])) {
 
     $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderID = '$orderID' and menuID = '$menuID'");
     $row = mysqli_fetch_assoc($sql2);
-    if($row['delivered'] == 0){
+    if($row['total'] == 0){
        $sql = mysqli_query($conn,"UPDATE orderlist SET status = 'Returned' WHERE orderID = '$orderID' and menuID = '$menuID' ");
      }
 
@@ -221,7 +282,11 @@ if (isset($_POST['createorder'])) {
     $orderID = $_POST['orderID'];
     $tablenumber = $_POST['tablenumber'];
     $result1 = mysqli_query($conn,"UPDATE orders SET status='Completed' WHERE order_id='$orderID'");
-    $result2 = mysqli_query($conn,"UPDATE tables SET status='Vacant' WHERE tablenumber='$tablenumber'");
+    $sql2 = mysqli_query($conn, "SELECT * from orders where table_number = '$tablenumber' and status != 'Completed'");
+    if(mysqli_num_rows($sql2) == 0){
+      $result2 = mysqli_query($conn,"UPDATE tables SET status='Vacant' WHERE tablenumber='$tablenumber'");
+      
+     }
 
     $_SESSION['success'] = 'Order Complete.';
   }
@@ -261,10 +326,13 @@ include 'inc/navbar.php'; ?>
               <div class="card-header">
                 <div class="row">
                   <div class="col-3">
-                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Add New Order</button>
+                  <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#item">Create New Order</button>
                   </div>
-                   <div class="col-3 float-right">
-                    <a href="orderhistory.php" class="btn btn-block btn-info">View Order History</a>
+                   <div class="col-3">
+                  <button type="button" class="btn btn-block btn-info" data-toggle="modal" data-target="#addneworder">Add Another Order</button>
+                  </div>
+                   <div class="col-3">
+                    <a href="orderhistory.php" class="btn btn-block btn-secondary">View Order History</a>
                   </div>
                 </div>
               </div>
@@ -425,7 +493,7 @@ include 'inc/navbar.php'; ?>
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title">Add Order</h4>
+              <h4 class="modal-title">Create Order</h4>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -517,6 +585,103 @@ include 'inc/navbar.php'; ?>
                   </div>
                   <!-- /.modal -->
 
+
+                        <div class="modal fade" id="addneworder">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Add Order</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+
+              <form action="order.php" method="POST">
+                <input class="form-check-input" type="hidden" name="adminid" id="adminid" value="<?php echo $user['id'];?>" style="visibility: hidden;">
+                <div class="card-body">
+      
+                  <div class="form-group row">
+                    <label for="tablenumber" class="col-sm-4 col-form-label">Table Number</label>
+                    <div class="col-sm-8">
+                      <?php $table = mysqli_query($conn, "SELECT * from tables where status = 'Occupied'");?>
+                      <select class="form-control" name="tablenumber" id="tablenumber" required>
+                        <?php foreach($table as $vacant): ?>
+                        <option value="<?= $vacant['tablenumber']; ?>"><?= ucfirst($vacant['tablenumber']); ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </div>
+                  </div>
+                <table id="dynamic_field1" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th width="200">Menu Name</th>
+                    <th width="30">Quantity</th>
+  <!--                   <th width="150">Recipe</th> -->
+                    <th width="100">Add</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr>
+                    <?php $addnew = mysqli_query($conn, "SELECT name, id as menuID FROM menu order by name");?>
+                    <td>
+                       <select class="form-control" name="addmenuName[]" id="addmenuName_1" required>
+                        <?php foreach($addnew as $addnewmenu): ?>
+                        <option value="<?= $addnewmenu['menuID']; ?>"><?= ucfirst($addnewmenu['name']); ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                    </td>
+                    <td>
+                      <input type="number" class="form-control" step=".01" name="addqtyMenu[]" id="addquantity_1" required>
+                    </td>
+<!--                     <td><div class="form-group" id="display_1"></div></td> -->
+                    <td>
+                    <button type="button" name="add1" id="add1" class="btn btn-success btn-xs">Add Menu</button>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+<!-- Suggestions will be displayed in below div. -->
+        <!--            <div class="form-group" id="display"></div> -->
+                </div>
+                <!-- /.card-body -->
+              
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <a data-toggle='modal' data-target='#addanotherorder' href='#addanotherorder' class="btn btn-primary">Add Order</a>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+
+                  <div class="modal fade" id="addanotherorder">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title">Are you sure?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">              
+                          
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button type="submit" class="btn btn-primary" name="additionalorder">Confirm</button>
+                           </form>
+                        </div>
+                      </div>
+                      <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                  </div>
+                  <!-- /.modal -->
+
   </div><!-- /.content -->
 </div><!-- /.content-wrapper -->
 
@@ -526,6 +691,25 @@ include 'inc/navbar.php'; ?>
 </div>
 <!-- ./wrapper -->
 <?php include 'inc/scripts.php'; ?>
+<script>
+$(document).ready(function(){
+  var i=1;
+  $('#add1').click(function(){
+    i++;
+    $('#dynamic_field1').append('<tr id="row'+i+'"><td><select class="form-control" name="addmenuName[]" id="addmenuName_'+i+'" required><?php foreach($addnew as $addnewmenu): ?><option value="<?= $addnewmenu['menuID']; ?>"><?= ucfirst($addnewmenu['name']); ?></option><?php endforeach; ?></select></td><td><input type="number" class="form-control" step=".01" name="addqtyMenu[]" id="addquantity_'+i+'" required></td><td><a type="button" name="remove" id="'+i+'" class="btn_remove btn btn-danger btn-xs">DELETE</a></td></tr>');
+     $('#addmenuName'+i+'').select2({ width: '100%' });
+
+
+  });
+  
+
+  $(document).on('click', '.btn_remove', function(){
+    var button_id = $(this).attr("id"); 
+    $('#row'+button_id+'').remove();
+  });
+  
+});
+</script>
 <script>
 $(document).ready(function(){
   var i=1;

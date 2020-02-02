@@ -36,7 +36,7 @@ include 'inc/navbar.php'; ?>
             <!-- small box -->
             <div class="small-box bg-primary">
               <div class="inner">
-                <p>Out of stock Reports</p>
+                <p>Out of stock Report</p>
               </div>
               <a href="outofstockprint.php" target="_blank" class="small-box-footer"><i class="fas fa-print"></i> Print</a>
             </div>
@@ -44,14 +44,23 @@ include 'inc/navbar.php'; ?>
 
           <div class="col-lg-3 col-6">
             <!-- small box -->
-            <div class="small-box bg-info">
+            <div class="small-box bg-secondary">
               <div class="inner">
-                <p>Order History Reports</p>
+                <p>Order History Report</p>
               </div>
               <a href="orderhistoryprint.php" target="_blank" class="small-box-footer"><i class="fas fa-print"></i> Print</a>
             </div>
           </div>
 
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-info">
+              <div class="inner">
+                <p>Current Inventory Report</p>
+              </div>
+              <a href="inventoryprint.php" target="_blank" class="small-box-footer"><i class="fas fa-print"></i> Print</a>
+            </div>
+          </div>
          
         </div>
         <!-- /.row -->

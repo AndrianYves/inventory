@@ -11,6 +11,9 @@ if(isset($_POST['submit'])){
       $sql = mysqli_query($conn, "INSERT INTO reconciliation(inventoryID, current, remarks, date, timestamp, adminID) VALUES('".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."', '".mysqli_real_escape_string($conn, $_POST["remarks"][$i])."', '$date', '$timestamp', '$adminID')");  
 
        $sql1 = mysqli_query($conn,"UPDATE inventory SET quantity = '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."' WHERE id = '".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."'"); 
+
+       $sql2 = mysqli_query($conn, "INSERT INTO ledger(inventoryID, quantity, transaction, remarks, timestamp, adminID) VALUES('".mysqli_real_escape_string($conn, $_POST["inventoryID"][$i])."', '".mysqli_real_escape_string($conn, $_POST["quantity"][$i])."', 'Reconciliation', '".mysqli_real_escape_string($conn, $_POST["remarks"][$i])."', '$timestamp', '$adminID')");
+
     }
     
     $_SESSION['success'] = 'Reconciliation Successful. Inventory Update.';
@@ -116,7 +119,7 @@ include 'inc/navbar.php'; ?>
                       <td><?php echo date("F d, Y", strtotime($row['date']));?></td>
                       <td><?php echo date("F d, Y H:i", strtotime($row['timestamp']));?></td>
                       <td><?php echo ucfirst($row['lastname']);?>, <?php echo ucfirst($row['firstname']);?></td>
-                      <td><a data-toggle="modal" data-target='#view<?php echo $row['reconID']; ?>' class="btn btn-info btn-sm m-0">View</a></td>
+                      <td><a data-toggle="modal" data-target='#view<?php echo $row['reconID']; ?>' class="btn btn-info btn-sm m-0">View</a><a href="reconciliationreport.php?id=<?php echo $row['date'];?>" target="_blank" class="btn btn-info btn-sm m-0"><i class="fas fa-print"></i> Print</a></td>
                   </tr>
                   <div class="modal fade" id="view<?php echo $row['reconID']; ?>">
                     <div class="modal-dialog">
