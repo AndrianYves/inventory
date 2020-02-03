@@ -47,11 +47,11 @@ include 'inc/navbar.php'; ?>
                   </thead>
                   <tbody>
                   <?php
-                  $getAllOrders = mysqli_query($conn, "SELECT * FROM `orders` join ordersreturn on ordersreturn.orderID = orders.order_id join menu on menu.id = ordersreturn.menuID");
+                  $getAllOrders = mysqli_query($conn, "SELECT *, ordersreturn.timestamp as retTime FROM `orders` join ordersreturn on ordersreturn.orderID = orders.order_id join menu on menu.id = ordersreturn.menuID order by ordersreturn.timestamp desc");
                   while($row = mysqli_fetch_assoc($getAllOrders)) {
                   ?>
                     <tr>
-                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['timestamp']));  ?></td>
+                      <td><?php echo date('F-j-Y/ g:i A',strtotime($row['retTime']));  ?></td>
                       <td><?php echo $row['order_id']; ?></td>
                       <td><?php echo $row['remarks']; ?></td>
                       <td>

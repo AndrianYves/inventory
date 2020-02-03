@@ -68,10 +68,9 @@ if(isset($_SERVER['HTTP_REFERER'])) {
                                     } else {
                                     $color ='green';
                                     }
-
                                     ?>
                                     <tr>
-                                    <td><?php echo date("F d, Y H:i", strtotime($row1['ledTime']));?></td>
+                                    <td><?php echo date("F d, Y g:i A", strtotime($row1['ledTime']));?></td>
                                     <td class="text-<?php echo $color;?>"><?php echo $row1['ledQuan'];?><?php echo $row1['uomname'];?></td>
                                     <td><?php echo ucfirst($row1['transaction']);?> <?php echo $row1['transactionID'];?></td>
                                     <td><?php echo ucfirst($row1['lastname']);?>, <?php echo ucfirst($row1['firstname']);?></td>

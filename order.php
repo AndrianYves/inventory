@@ -11,7 +11,7 @@ if (isset($_POST['createorder'])) {
   $error = false;
   $tablenumber = mysqli_real_escape_string($conn, $_POST["tablenumber"]);
 
-  $getTimestamp = date("Y-m-d H:i");
+  $getTimestamp = date("Y-m-d H:i:s");
   // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
 
   $number = count($_POST["menuName"]);
@@ -72,7 +72,7 @@ if (isset($_POST['additionalorder'])) {
   $error = false;
   $tablenumber = mysqli_real_escape_string($conn, $_POST["tablenumber"]);
 
-  $getTimestamp = date("Y-m-d H:i");
+  $getTimestamp = date("Y-m-d H:i:s");
   // $result1 = mysqli_query($conn,"UPDATE inventory SET quantity=quantity + '$quantity' WHERE itemname='$inventory'");
 
   $number = count($_POST["addmenuName"]);
@@ -131,7 +131,7 @@ if (isset($_POST['additionalorder'])) {
 
     $sql = mysqli_query($conn,"UPDATE orderlist SET `total`=total-'$quantitystatus', `delivered`=delivered+'$quantitystatus' WHERE orderID = '$orderID' and menuID = '$menuID' ");
     
-    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID'");
+    $sql2 = mysqli_query($conn, "SELECT * from orderlist where orderlist.orderID = '$orderID' and menuID = '$menuID'");
     $row = mysqli_fetch_assoc($sql2);
      if($row['total'] == 0){
        $sql = mysqli_query($conn,"UPDATE orderlist SET status = 'Delivered' WHERE orderID = '$orderID' and menuID = '$menuID' ");
@@ -146,7 +146,7 @@ if (isset($_POST['additionalorder'])) {
     $error = false;
 
 
-    $getTimestamp = date("Y-m-d H:i");
+    $getTimestamp = date("Y-m-d H:i:s");
     $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
@@ -196,7 +196,7 @@ if (isset($_POST['additionalorder'])) {
     mysqli_autocommit($conn, false);
     $error = false;
 
-    $getTimestamp = date("Y-m-d H:i");
+    $getTimestamp = date("Y-m-d H:i:s");
     $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
@@ -239,7 +239,7 @@ if (isset($_POST['additionalorder'])) {
   if(isset($_POST['returned'])){ 
      mysqli_autocommit($conn, false);
     $error = false;
-    $getTimestamp = date("Y-m-d H:i");
+    $getTimestamp = date("Y-m-d H:i:s");
     $adminID = mysqli_real_escape_string($conn, $_POST["adminid"]);
     $orderID = $_POST['orderID'];
     $menuID = $_POST['menuID'];
